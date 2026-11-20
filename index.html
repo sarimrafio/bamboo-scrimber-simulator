@@ -1,0 +1,1292 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="color-scheme" content="light" />
+<link rel="icon" href="data:," />
+<title>Terra Chemica — Bamboo Scrimber Simulations</title>
+<style>
+  :root{
+    --page:#FAFAF9; --panel:#FFFFFF; --text:#111827; --muted:#6B7280;
+    --border:#E5E7EB; --accent:#0F766E; --track:#E5E7EB;
+    color-scheme: light;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--page);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;line-height:1.55;-webkit-font-smoothing:antialiased;overflow-x:hidden;font-variant-numeric:tabular-nums}
+  button,input{font:inherit}
+  sub,sup{font-size:.72em;line-height:0;position:relative;vertical-align:baseline}
+  sup{top:-.48em}
+  sub{bottom:-.22em}
+  .wrap{max-width:1060px;margin:0 auto;padding:0 20px 64px}
+  header.site{padding:34px 0 18px;border-bottom:1px solid var(--border);margin-bottom:28px}
+  header.site h1{font-size:20px;font-weight:600;margin:0;letter-spacing:-0.01em}
+  header.site .paper{margin:5px 0 0;font-size:13px;color:var(--muted)}
+  .card{background:var(--panel);border:1px solid var(--border);border-radius:8px;box-shadow:0 1px 2px rgba(17,24,39,.04);padding:22px;margin-bottom:28px}
+  .card-head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin-bottom:6px}
+  .card-head h2{font-size:18px;font-weight:500;margin:0;line-height:1.35}
+  .card-head h2 .num{color:var(--muted);font-weight:400;margin-right:10px;font-size:14px}
+  .badge{flex:none;font-size:11px;font-weight:500;letter-spacing:.04em;padding:3px 8px;border:1px solid var(--border);border-radius:4px;background:#F9FAFB;color:var(--muted);margin-top:3px;text-align:center}
+  .head-actions{display:flex;align-items:flex-start;gap:8px;flex:none}
+  .why-btn{font-size:12.5px;font-weight:500;color:var(--text);background:#fff;border:1px solid var(--border);border-radius:6px;padding:5px 10px;cursor:pointer;min-height:32px;white-space:nowrap}
+  .why-btn:hover{border-color:#D1D5DB;background:#F9FAFB}
+  .why-btn:focus-visible,.reset:focus-visible,.seg button:focus-visible,input[type="range"]:focus-visible,.play-btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+  .why{display:none;border-top:1px solid var(--border);padding:12px 2px 2px;margin-bottom:12px;font-size:14px;color:var(--muted)}
+  .why.open{display:block}
+  .why p{margin:0;max-width:72ch}
+  .sub{margin:0 0 14px;font-size:13.5px;color:var(--muted);max-width:78ch}
+  .viewport{position:relative;width:100%;aspect-ratio:16/9;border:1px solid var(--border);border-radius:6px;overflow:hidden;background:#F3F4F6}
+  .viewport canvas.sim{position:absolute;inset:0;width:100%;height:100%;display:block}
+  .readouts{display:flex;flex-wrap:wrap;gap:8px 22px;margin-top:14px;padding:12px 2px 2px;border-top:1px solid var(--border)}
+  .ro{font-size:13px;color:var(--muted)}
+  .ro b{color:var(--text);font-weight:600}
+  .ro.coupled b{color:var(--accent)}
+  .srcbox{display:grid;grid-template-columns:1fr;gap:10px;margin-top:12px}
+  @media(min-width:820px){.srcbox{grid-template-columns:1fr 1fr}}
+  .src{border:1px solid var(--border);border-radius:6px;padding:10px 12px;background:#FDFDFC}
+  .src p{margin:4px 0 0;font-size:12.5px;line-height:1.55;color:var(--muted)}
+  .src-lab{font-size:11.5px;font-weight:600}
+  .src-lab.exp{color:#92400E}
+  .src-lab.mod{color:var(--accent)}
+  .mid{display:grid;grid-template-columns:1fr;gap:14px;margin-top:14px}
+  @media(min-width:820px){.mid{grid-template-columns:1fr 1fr}}
+  .eqbox{border:1px solid var(--border);border-radius:6px;padding:12px 14px;background:#FDFDFC}
+  .eqbox h3,.graphbox h3{font-size:12px;font-weight:600;color:var(--muted);margin:0 0 8px;letter-spacing:.02em}
+  .eqbox p{margin:0 0 7px;font-size:13px;line-height:1.5}
+  .eqbox p:last-child{margin-bottom:0}
+  .eqbox .eq{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12.5px;color:var(--text)}
+  .eqbox .note{color:var(--muted);font-size:12.5px}
+  .graphs{display:grid;grid-template-columns:1fr;gap:14px}
+  @media(min-width:820px){.graphs.two{grid-template-columns:1fr 1fr}}
+  .graphbox{border:1px solid var(--border);border-radius:6px;padding:10px 12px 8px;background:#fff}
+  .graphbox canvas{width:100%;height:118px;display:block}
+  .controls{display:grid;grid-template-columns:1fr;gap:6px;margin-top:16px}
+  @media(min-width:760px){.controls{grid-template-columns:1fr 1fr;gap:6px 32px}}
+  .ctl{padding:4px 0}
+  .ctl .lab{display:flex;justify-content:space-between;align-items:baseline;gap:10px;font-size:13.5px;color:var(--muted)}
+  .ctl .lab label{font-weight:400;color:var(--text)}
+  .ctl .val{font-weight:500;color:var(--text);font-size:13.5px;white-space:nowrap}
+  input[type="range"]{width:100%;height:32px;margin:2px 0 0;cursor:pointer;background:transparent;-webkit-appearance:none;appearance:none;background-repeat:no-repeat;background-size:100% 3px;background-position:center}
+  input[type="range"]::-webkit-slider-runnable-track{height:3px;border-radius:99px;background:transparent}
+  input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:15px;height:15px;border-radius:50%;background:#fff;border:2px solid var(--accent);margin-top:-6px}
+  input[type="range"]::-moz-range-track{height:3px;border-radius:99px;background:var(--track)}
+  input[type="range"]::-moz-range-progress{height:3px;border-radius:99px;background:var(--accent)}
+  input[type="range"]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;background:#fff;border:2px solid var(--accent)}
+  .seg{display:flex;gap:8px;padding:6px 0 8px}
+  .seg button{flex:1;min-height:38px;border-radius:6px;border:1px solid var(--border);background:#fff;color:var(--muted);font-weight:500;cursor:pointer}
+  .seg button.on{border-color:var(--accent);color:var(--accent);background:#F0FDF9}
+  .foot{display:flex;align-items:center;justify-content:space-between;gap:14px;border-top:1px solid var(--border);margin-top:14px;padding-top:12px}
+  .caption{font-size:13.5px;font-weight:500;margin:0;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .foot-actions{display:flex;gap:8px;flex:none}
+  .play-btn,.reset{background:#fff;border:1px solid var(--border);border-radius:6px;color:var(--text);font-weight:500;font-size:12.5px;cursor:pointer;min-height:32px;padding:5px 12px}
+  .play-btn{min-width:76px}
+  .play-btn:hover,.reset:hover{border-color:#D1D5DB;background:#F9FAFB}
+  .clock{font-size:12.5px;color:var(--muted);white-space:nowrap}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="site"><h1>Terra Chemica — Bamboo Scrimber Simulations</h1><p class="paper">Chemical Densification and Resin Optimization for High-Strength Bamboo Scrimber</p></header>
+  <main id="cards"></main>
+</div>
+<script>
+"use strict";
+/* ================================================================
+   Coupled model kernel — Dhaka bamboo scrimber model (SI units).
+   One shared physics core feeds all three simulations, so a single
+   slider change ripples through viscosity, penetration, cure,
+   density, damage and MOR together.
+
+   - Kelley–Bueche Tg: TgC(mc) blends dry bamboo Tg (448 K) and
+     water Tg (135 K), factor 3.2. At 10% MC, Tg = 92.9 °C.
+   - Viscosity: Arrhenius × Krieger–Dougherty solids term
+     (1 − Cs/0.48)^−2.5 × gel factor (0.62/(0.62−α))^1.6 diverging
+     at the Kamal–Sourour gel point α = 0.62.
+     Anchors (25 °C, α=0): LBR 15% SC → 20.9 mPa·s, 35% → 214.8,
+     PF 25% SC → 59.8.
+   - Penetration: Lucas–Washburn / Darcy, z² = 2·k_eff·ΔP·t/(μ·φ),
+     ΔP = 2γ·cosθ/r (capillary) with a pressure-assist factor
+     (0.7 + 0.06·P[MPa], = 1.00 at the 5 MPa optimum).
+     Kozeny–Carman permeability with clogging collapse
+     k_eff = k_base · exp(−4.2·max(0, Cs − 0.18)).
+     Anchors (900 s soak): LBR wide 15% → 3.91 mm, 35% → 0.86 mm,
+     PF narrow 25% → 1.86 mm. PF uses the narrow-strip pore
+     geometry (r = 21.5 µm) of the conventional process; LBR uses
+     the wide-bundle geometry (r = 26 µm).
+   - Cure: Kamal–Sourour dα/dt = (k1 + k2·α^m)(1−α)^n,
+     k = A·exp(−Ea/RT), separate LBR / PF sets, RK4. Resin
+     temperature lags the platen, first-order, τ = 175 s (wide)
+     / 220 s (narrow). LBR 150 °C → α(15 min) = 96.1%,
+     gel (α = 0.62) at 9.98 min.
+   - Compression: Gibson–Ashby cell collapse integrated with RK4
+     alongside cure (solvePress). Damage D from a Kc width factor
+     (1.42 narrow → 1.00 wide) over a Tg-corrected fracture
+     stress: limits 9.23 MPa wide / 6.50 MPa narrow at
+     150 °C / 10% MC. PF narrow at 12 MPa → D = 54.1%.
+   - MOR couples density, resin fill, cure and damage (see
+     pressPerformance). Optimal LBR wide → MOR 157.3 MPa at
+     ρ = 1.168 g/cm³; MOR peaks at 168.4 MPa near 9 MPa.
+   ================================================================ */
+var R_GAS = 8.314462618, PHI0 = 0.567, RHO0 = 0.65, RHO_S = 1.50, EPS_MAX = 0.529, Z0 = 5e-5, HALF_T = 0.004;
+function clamp(v,a,b){ return Math.min(b, Math.max(a, v)); }
+function lerp(a,b,t){ return a + (b-a)*t; }
+function TgC(mc){ var wb = Math.max(1-mc, 0.5); return (wb*448.15 + 3.2*mc*135.15)/(wb + 3.2*mc) - 273.15; }
+function glassiness(T, mc){ return 1/(1 + Math.exp((T - TgC(mc))/14)); }
+function viscosity(Cs, Tk, alpha, resin){ /* Pa·s */
+  var mb = resin === 'PF' ? 0.0095 : 0.0082, E = resin === 'PF' ? 22000 : 24500;
+  var cs = clamp(Cs, 0.01, 0.46);
+  var m = mb * Math.exp((E/R_GAS)*(1/Tk - 1/298.15)) * Math.pow(1 - cs/0.48, -2.5);
+  if (alpha > 0){ var gel = Math.pow(0.62 / Math.max(0.62 - Math.min(alpha, 0.62*0.995), 1e-3), 1.6); m *= gel; }
+  return m;
+}
+function clogC(Cs){ return Math.exp(-4.2 * Math.max(0, Cs - 0.18)); }
+function unifU(Cs){ return Math.exp(-2.8 * Math.max(0, Cs - 0.18)); }
+function poreGeom(resin, bundle){
+  var b = bundle || (resin === 'PF' ? 'narrow' : 'wide');
+  return { bundle:b, r:(b === 'wide' ? 26e-6 : 21.5e-6), kbase:(b === 'wide' ? 3.2e-14 : 2.2e-14), gamma:(resin === 'PF' ? 0.055 : 0.052) };
+}
+function capPressure(thetaDeg, resin, bundle){
+  var g = poreGeom(resin, bundle);
+  return 2 * g.gamma * Math.cos(thetaDeg * Math.PI/180) / g.r;
+}
+function washburnZ(tSec, Cs, resin, thetaDeg, P_MPa, bundle){
+  var g = poreGeom(resin, bundle);
+  var keff = g.kbase * clogC(Cs);
+  var mu = viscosity(Cs, 298.15, 0, resin);
+  var drive = capPressure(thetaDeg, resin, bundle) * (0.7 + 0.06 * (P_MPa != null ? P_MPa : 5));
+  return Math.min(Math.sqrt(Z0*Z0 + 2*keff*drive*Math.max(tSec,0)/(mu*PHI0)), HALF_T);
+}
+function KcWidth(w){
+  if (w >= 200) return 1.00; if (w <= 30) return 1.42;
+  var f = clamp((Math.log10(w) - Math.log10(30))/(Math.log10(200) - Math.log10(30)), 0, 1);
+  return 1.42 - 0.42*f;
+}
+function sigmaFracBase(T, mc){ return 7.4 + 0.032 * Math.min(Math.max(0, T - TgC(mc)), 70); }
+function damageCalc(P, T, mc, widthMm){
+  var sf = sigmaFracBase(T, mc) / KcWidth(widthMm);
+  var over = Math.max(0, P - sf);
+  var steam = Math.max(0, (mc - 0.11)*7) * Math.max(0, (T - 160)/20);
+  var D = clamp(1 - Math.exp(-0.078*Math.pow(over, 1.35) - 0.35*steam), 0, 0.85);
+  return { D: D, sigmaFrac: sf, steam: steam, over: over };
+}
+function cureRate(alpha, Tk, resin){
+  var A1, Ea1, A2, Ea2, m, n;
+  if (resin === 'PF'){ A1=1.45e4; Ea1=57800; A2=6.2e5; Ea2=59800; m=1.10; n=1.30; }
+  else { A1=1.15e4; Ea1=58500; A2=5.40e5; Ea2=60200; m=1.15; n=1.35; }
+  var k1 = A1*Math.exp(-Ea1/(R_GAS*Tk)), k2 = A2*Math.exp(-Ea2/(R_GAS*Tk));
+  return (k1 + k2*Math.pow(Math.max(alpha,1e-6), m)) * Math.pow(1-alpha, n);
+}
+function coreTemp(t, Tpress, bundle){ var tau = bundle === 'wide' ? 175 : 220; return Tpress - (Tpress - 25)*Math.exp(-t/tau); }
+function kcRatio(phi){
+  phi = clamp(phi, 0.04, 0.92);
+  return (Math.pow(phi,3)/Math.pow(1-phi,2)) / (Math.pow(0.567,3)/Math.pow(0.433,2));
+}
+/* Standalone Kamal–Sourour cure solve with thermal lag (Sim 1).
+   Moisture factor (0.9 + mc) = 1.00 at 10% MC. RK4, dt = 1 s. */
+function cureSolve(Tpress, resin, mc, bundle, tEnd){
+  var dt = 1, steps = Math.round(tEnd/dt), a = 0.01, series = [], gelT = null, prevA = a;
+  var mfac = 0.9 + mc;
+  function rate(t, a2){ return cureRate(a2, coreTemp(t, Tpress, bundle) + 273.15, resin) * mfac; }
+  for (var i = 0; i <= steps; i++){
+    var t = i*dt;
+    if (i % 5 === 0 || i === steps) series.push({ t:t, alpha:a, Tr:coreTemp(t, Tpress, bundle) });
+    if (gelT === null && a >= 0.62 && prevA < 0.62) gelT = t - dt + dt*(0.62 - prevA)/Math.max(1e-9, a - prevA);
+    prevA = a;
+    if (i === steps) break;
+    var k1 = rate(t, a), k2 = rate(t+dt/2, a+k1*dt/2), k3 = rate(t+dt/2, a+k2*dt/2), k4 = rate(t+dt, a+k3*dt);
+    a = clamp(a + (k1+2*k2+2*k3+k4)*dt/6, 0, 0.999);
+  }
+  return { alpha:a, gelT:gelT, series:series };
+}
+/* Coupled cure + Gibson–Ashby compression RK4 solve (Sims 2–3). */
+function solvePress(o){
+  var dt = o.dt || 1, steps = Math.max(1, Math.round(o.tEnd/dt));
+  var a = 0.01, eps = 0, series = o.series ? [] : null;
+  function deriv(t, a2, e2){
+    var Tc = coreTemp(t, o.T, o.bundle);
+    var da = cureRate(a2, Tc + 273.15, o.resin);
+    var g = glassiness(Tc, o.mc);
+    var spl = 0.95 + 6.4*g;
+    var en = Math.min(e2/EPS_MAX, 0.96);
+    var scell = (e2 < 0.05 ? 14*e2 : 0.7) + spl*(1 - Math.exp(-e2/0.04)) + 0.42*Math.pow(en,2.4)/Math.pow(1-en,1.35);
+    var eta = (72 + 280*g) * (1 + 1.8*a2*a2);
+    var de = e2 >= 0.95*EPS_MAX ? 0 : Math.max(0, (o.P - scell)/eta);
+    return [da, de];
+  }
+  for (var i = 0; i <= steps; i++){
+    var t = i*dt;
+    if (series && (i % Math.max(1, Math.round(5/dt)) === 0 || i === steps)){
+      var rhoS = RHO0/(1-eps), phiS = 1 - rhoS/RHO_S;
+      series.push({ t:t, alpha:a, eps:eps, rho:rhoS, phi:phiS, kc:kcRatio(phiS), Tc:coreTemp(t, o.T, o.bundle) });
+    }
+    if (i === steps) break;
+    var k1 = deriv(t, a, eps);
+    var k2 = deriv(t+dt/2, a+k1[0]*dt/2, eps+k1[1]*dt/2);
+    var k3 = deriv(t+dt/2, a+k2[0]*dt/2, eps+k2[1]*dt/2);
+    var k4 = deriv(t+dt, a+k3[0]*dt, eps+k3[1]*dt);
+    a = clamp(a + (k1[0]+2*k2[0]+2*k3[0]+k4[0])*dt/6, 0, 0.999);
+    eps = clamp(eps + (k1[1]+2*k2[1]+2*k3[1]+k4[1])*dt/6, 0, EPS_MAX);
+  }
+  var rho = RHO0/(1-eps);
+  return { alpha:a, eps:eps, rho:rho, series:series };
+}
+function pressPerformance(o){
+  var s = solvePress(o);
+  /* Soak penetration is the pre-press impregnation step, so it is
+     evaluated at the 5 MPa reference (pressure-assist factor 1.00);
+     press pressure itself enters through density and damage. */
+  var z = washburnZ(o.soakT != null ? o.soakT : 900, o.Cs, o.resin, o.theta != null ? o.theta : 38, 5, o.bundle);
+  var pf = z / HALF_T, pfe = 100 * pf * unifU(o.Cs);
+  var dmg = damageCalc(o.P, o.T, o.mc, o.width);
+  var imn = Math.min(pfe/88, 1);
+  var bond = (0.42*imn + 0.58*s.alpha) * (1 - 0.24*dmg.D);
+  var MOR = 158 * Math.pow(s.rho/1.15, 1.15) * bond;
+  var MOE = 20.68 * Math.pow(s.rho/1.50, 1.1) * (0.45 + 0.55*s.alpha) * (1 - 0.35*dmg.D);
+  var tensile = MOR * (0.677 + 0.05*imn) * (1 - 0.10*dmg.D);
+  return { alpha:s.alpha, rho:s.rho, eps:s.eps, z:z, pf:pf, pfe:pfe, D:dmg.D, sigmaFrac:dmg.sigmaFrac, MOR:MOR, MOE:MOE, tensile:tensile, imn:imn };
+}
+/* Saturation vapour pressure (Tetens form, kPa) and the Ge 2024
+   press scalings: peak vapour ×2 at 170 °C vs 140 °C (follows
+   p_sat), ×1.8 at 7 MPa vs 4 MPa → factor (P/4)^1.05. */
+function pSat(Tc){ return 0.611 * Math.exp(17.27 * Tc / (Tc + 237.3)); }
+/* Surface / core temperature + vapour series for Sim 2. The core
+   lags the platen (τ by bundle), stalls near 100 °C while free
+   water evaporates (latent-heat sink), then catches up. */
+function pressSeries(T, P, mc, widthMm, holdMin){
+  var bundle = widthMm >= 100 ? 'wide' : 'narrow';
+  var tau = bundle === 'wide' ? 175 : 220;
+  var tEnd = Math.max(holdMin, 0.5) * 60, dt = 5, out = [];
+  var Tc = 25, water = mc;
+  for (var t = 0; t <= tEnd + 0.1; t += dt){
+    var Ts = T - (T - 25) * Math.exp(-t/35);
+    var vap = pSat(Math.max(Tc, 25)) * Math.pow(mc/0.10, 0.8) * Math.pow(Math.max(P,0.5)/4, 1.05) * (0.30 + 0.70 * smooth01(t/240));
+    out.push({ t:t, Ts:Ts, Tc:Tc, vap:vap });
+    var rate = (T - Tc) / tau;
+    if (Tc > 94 && Tc < 106 && water > 0.015) rate *= 0.30; /* evaporation stall near 100 °C */
+    Tc += rate * dt;
+    if (Tc > 96) water = Math.max(0, water - dt * 0.00006 * Math.max(0, Tc - 90));
+    if (Tc > T) Tc = T;
+  }
+  return out;
+}
+function smooth01(x){ x = clamp(x, 0, 1); return x*x*(3-2*x); }
+var solveCache = {};
+function cachedSolve(key, fn){ if (!(key in solveCache)) solveCache[key] = fn(); return solveCache[key]; }
+function hexRgb(h){ return [parseInt(h.slice(1,3),16), parseInt(h.slice(3,5),16), parseInt(h.slice(5,7),16)]; }
+function gradCss(stops, x){
+  if (x <= stops[0][0]) return stops[0][1];
+  for (var i = 1; i < stops.length; i++){
+    if (x <= stops[i][0]){
+      var t = (x - stops[i-1][0]) / (stops[i][0] - stops[i-1][0]);
+      var a = hexRgb(stops[i-1][1]), b = hexRgb(stops[i][1]);
+      return 'rgb(' + Math.round(lerp(a[0],b[0],t)) + ',' + Math.round(lerp(a[1],b[1],t)) + ',' + Math.round(lerp(a[2],b[2],t)) + ')';
+    }
+  }
+  return stops[stops.length-1][1];
+}
+function colR(mu_mPas){ var x = clamp(Math.log10(Math.max(mu_mPas,0.01)/20.92)/Math.log10(30), 0, 1); return gradCss([[0,'#F4C95D'],[0.33,'#D98E1F'],[0.66,'#A8561A'],[1,'#5B2A0F']], x); }
+function colH(T){ return gradCss([[25,'#1E3A8A'],[60,'#06B6D4'],[93,'#FACC15'],[130,'#F97316'],[180,'#DC2626']], clamp(T,25,180)); }
+function colC(a){ return gradCss([[0,'#F4C95D'],[0.62,'#C2410C'],[1,'#3B1D0E']], clamp(a,0,1)); }
+function seededRand(seed){ var s = seed % 2147483647; if (s <= 0) s += 2147483646; return function(){ s = s * 16807 % 2147483647; return (s - 1) / 2147483646; }; }
+function seriesAt(series, t){
+  if (!series || !series.length) return null;
+  if (t <= series[0].t) return series[0];
+  for (var i = 1; i < series.length; i++){
+    if (t <= series[i].t){
+      var a = series[i-1], b = series[i], f = (t - a.t) / Math.max(1e-6, b.t - a.t), o = {};
+      for (var k in b) o[k] = typeof b[k] === 'number' ? lerp(a[k], b[k], f) : b[k];
+      return o;
+    }
+  }
+  return series[series.length-1];
+}
+</script>
+<script>
+"use strict";
+/* ================================================================
+   The three coupled simulations — card definitions
+   ================================================================ */
+function fmtPct(v){ return Math.round(v) + '%'; }
+function supUni(str){ var map = {'0':'\u2070','1':'\u00B9','2':'\u00B2','3':'\u00B3','4':'\u2074','5':'\u2075','6':'\u2076','7':'\u2077','8':'\u2078','9':'\u2079','.':'\u00B7','-':'\u207B'}; return String(str).split('').map(function(c){ return map[c] || c; }).join(''); }
+function fmt1(v){ return (Math.round(v*10)/10).toFixed(1); }
+var SIM_DEFS = [
+  { title:'Coupled Resin Transport + Cure', badge:'MODEL · coupled solver',
+    sub:'One solver, four races at once: capillary flow (Washburn / Darcy) pushes resin into the pore network while Kamal–Sourour cure thickens it toward the gel point, permeability collapses as pores clog and close, and the glass transition climbs. Move any slider and viscosity, penetration, cure, density, damage and MOR all move together.',
+    why:'This is the paper\u2019s central mechanism in one place. The optimum (15% SC, 150 °C) only works because the resin front reaches 3.91 mm before gelation locks it — at 35% SC the same chemistry clogs the pore throats and stalls at 0.86 mm. Judges can break the recipe themselves and watch penetration, cure and final strength fail together, which is exactly the trade-off the optimisation had to solve.',
+    eq:[
+      ['Washburn / Darcy penetration','z<sup>2</sup> = 2\u00B7k<sub>eff</sub>\u00B7\u0394P\u00B7t / (\u03BC\u00B7\u03C6),  \u0394P = 2\u03B3\u00B7cos\u03B8 / r'],
+      ['Kozeny\u2013Carman + clogging','k<sub>eff</sub> = k<sub>0</sub>\u00B7exp(\u22124.2\u00B7max(0, C<sub>s</sub>\u22120.18))\u00B7\u03C6<sup>3</sup>/(1\u2212\u03C6)<sup>2</sup>'],
+      ['Krieger\u2013Dougherty viscosity','\u03BC = \u03BC<sub>0</sub>\u00B7exp[E<sub>a</sub>/R\u00B7(1/T\u22121/T<sub>0</sub>)]\u00B7(1\u2212C<sub>s</sub>/0.48)<sup>\u22122.5</sup>\u00B7(0.62/(0.62\u2212\u03B1))<sup>1.6</sup>'],
+      ['Kamal\u2013Sourour cure (RK4)','d\u03B1/dt = (k<sub>1</sub> + k<sub>2</sub>\u00B7\u03B1<sup>1.15</sup>)\u00B7(1\u2212\u03B1)<sup>1.35</sup>,  k = A\u00B7exp(\u2212E<sub>a</sub>/RT),  gel at \u03B1 = 0.62'],
+      ['Kelley\u2013Bueche T<sub>g</sub>','T<sub>g</sub> blends bamboo (448 K) and water (135 K) by moisture \u2014 92.9 \u00B0C at 10% MC']
+    ],
+    controls:[
+      { k:'Cs', label:'Solid content', min:10, max:35, step:1, def:15, fmt:fmtPct },
+      { k:'T', label:'Press temperature', min:120, max:180, step:1, def:150, fmt:function(v){return Math.round(v)+' \u00B0C';} },
+      { k:'theta', label:'Contact angle', min:18, max:90, step:1, def:38, fmt:function(v){return Math.round(v)+'\u00B0';} },
+      { k:'P', label:'Pressure', min:2, max:14, step:0.5, def:5, fmt:function(v){return fmt1(v)+' MPa';} },
+      { k:'mc', label:'Moisture content', min:6, max:18, step:0.5, def:10, fmt:function(v){return fmt1(v)+'%';} },
+      { k:'resin', label:'Resin', type:'toggle', options:['LBR','PF'], def:'LBR' }
+    ],
+    srcExp:'Optimum: 15% SC · 15 min impregnation · 10% MC · hot press 5 MPa / 150 °C / 15 min. Emissions: LBR board TVOC 2 µg/m<sup>3</sup> — only 1.6% of the PF board, so PF = 125 µg/m<sup>3</sup>; formaldehyde 0.21 mg/L, well under the E1 limit of 1.5 mg/L.',
+    srcModel:'At that optimum this model predicts penetration 3.91 mm, cure 96.1% and viscosity 20.9 mPa·s. Those are Dhaka model predictions, not Zheng\u2019s measurements — the live readouts above are model values and move with the sliders.',
+    graphs:[ { id:'pen', title:'Penetration vs time' }, { id:'cure', title:'Cure \u03B1 vs time \u2014 gel line 0.62' } ] },
+  { title:'Hot Press Densification + Steam', badge:'MODEL · coupled solver',
+    sub:'Gibson\u2013Ashby cell collapse densifies the board while heat soaks in: the surface hits platen temperature in seconds, the core lags, stalls near 100 \u00B0C as water evaporates, then catches up \u2014 driving a vapour-pressure peak inside the board. Too much pressure on narrow strips, or wet stock pressed too hot, and the board cracks or blows.',
+    why:'Pressing is where the paper wins or loses. Wide bundles reach density 1.168 g/cm<sup>3</sup> at only 5 MPa with zero damage because their fracture limit is 9.23 MPa; narrow strips crack at 6.50 MPa, so the conventional 12 MPa cycle destroys 54.1% of the structure. The steam side matters too: vapour peaks twice as high at 170 \u00B0C as at 140 \u00B0C (Ge 2024), which caps how hot wet stock can be pressed.',
+    eq:[
+      ['Gibson\u2013Ashby collapse','\u03C3<sub>cell</sub> = plateau + densification(\u03B5),  \u03C1 = \u03C1<sub>0</sub>/(1\u2212\u03B5),  parenchyma 48.5% \u2192 14.7%, vessels 9.5% \u2192 0.4%'],
+      ['Damage','\u03C3<sub>lim</sub> = \u03C3<sub>f</sub>(T, T<sub>g</sub>) / K<sub>c</sub>(w) \u2014 9.23 MPa wide, 6.50 MPa narrow at 150 \u00B0C / 10% MC;  D = 1 \u2212 exp(\u22120.078\u00B7\u27E8P\u2212\u03C3<sub>lim</sub>\u27E9<sup>1.35</sup>)'],
+      ['Core heat-up','T<sub>core</sub> lags the platen (\u03C4 = 175 s wide / 220 s narrow) and stalls near 100 \u00B0C while free water evaporates'],
+      ['Vapour pressure (Ge 2024)','p<sub>vap</sub> = p<sub>sat</sub>(T<sub>core</sub>)\u00B7(MC/10%)<sup>0.8</sup>\u00B7(P/4)<sup>1.05</sup> \u2014 peak \u00D72 at 170 vs 140 \u00B0C, \u00D71.8 at 7 vs 4 MPa'],
+      ['Steam blow risk','moisture > 11% with T > 160 \u00B0C \u2192 vapour outruns venting \u2192 bulge / delamination']
+    ],
+    controls:[
+      { k:'P', label:'Pressure', min:2, max:14, step:0.5, def:5, fmt:function(v){return fmt1(v)+' MPa';} },
+      { k:'T', label:'Press temperature', min:120, max:180, step:1, def:150, fmt:function(v){return Math.round(v)+' \u00B0C';} },
+      { k:'mc', label:'Moisture content', min:6, max:18, step:0.5, def:10, fmt:function(v){return fmt1(v)+'%';} },
+      { k:'w', label:'Strip width', min:20, max:250, step:5, def:225, fmt:function(v){return Math.round(v)+' mm';} },
+      { k:'hold', label:'Hold time', min:0, max:20, step:0.5, def:15, fmt:function(v){return fmt1(v)+' min';} }
+    ],
+    srcExp:'By press pressure (150 °C): 3 MPa — 1.09 g/cm<sup>3</sup> · MOR 133.3 MPa · 18.1 mm thick; 4 MPa — 1.19 g/cm<sup>3</sup> · 149.8 MPa · 16.2 mm; 5 MPa — 1.22 g/cm<sup>3</sup> · 128.8 MPa · 15.2 mm; 6 MPa — 1.23 g/cm<sup>3</sup> · 129.1 MPa · 15.6 mm.',
+    srcModel:'This model gives density 1.168 g/cm<sup>3</sup> at the optimum — a prediction, not a measurement. Zheng\u2019s measured density at 5 MPa is 1.22 g/cm<sup>3</sup>, not 1.168; the gap is model vs experiment, shown openly.',
+    graphs:[ { id:'temp', title:'Surface / core temperature vs time' }, { id:'vap', title:'Vapour pressure vs time' } ] },
+  { title:'Strength \u2014 Break It!', badge:'MODEL · coupled solver',
+    sub:'The payoff, fed by the two solvers above: density from the press, damage from the fracture limit, cure and resin fill from transport \u2014 all four combine into MOR, MOE and tensile strength, then a 3-point bending test loads the beam until it holds or snaps. Pressing harder is not better: MOR peaks near 9 MPa, and 5 MPa is chosen because damage there is still zero.',
+    why:'This sim answers the judge\u2019s hardest question \u2014 \u201Cwhy not just press harder or add more resin?\u201D \u2014 with the paper\u2019s own numbers. MOR climbs to 168.4 MPa near 9 MPa, but damage grows past the fracture limit, so the chosen point is 5 MPa: 157.3 MPa with 0% damage. The conventional PF narrow board (115.1 MPa, 54.1% damage) and the over-concentrated 35% recipe (99.9 MPa) both break earlier and weaker, live on the beam.',
+    eq:[
+      ['Strength coupling','MOR = 158\u00B7(\u03C1/1.15)<sup>1.15</sup>\u00B7[0.42\u00B7fill + 0.58\u00B7\u03B1]\u00B7(1\u22120.24\u00B7D)'],
+      ['Stiffness','MOE = 20.68\u00B7(\u03C1/1.50)<sup>1.1</sup>\u00B7(0.45 + 0.55\u00B7\u03B1)\u00B7(1\u22120.35\u00B7D)'],
+      ['Tensile','\u03C3<sub>t</sub> = MOR\u00B7(0.677 + 0.05\u00B7fill)\u00B7(1\u22120.10\u00B7D)'],
+      ['Bending test','F = (48\u00B7E\u00B7I/L<sup>3</sup>)\u00B7\u03B4 until surface stress reaches MOR \u2014 then the beam fails']
+    ],
+    controls:[
+      { k:'P', label:'Pressure', min:2, max:14, step:0.5, def:5, fmt:function(v){return fmt1(v)+' MPa';} },
+      { k:'w', label:'Strip width', min:20, max:250, step:5, def:225, fmt:function(v){return Math.round(v)+' mm';} },
+      { k:'Cs', label:'Solid content', min:10, max:35, step:1, def:15, fmt:fmtPct },
+      { k:'resin', label:'Resin', type:'toggle', options:['LBR','PF'], def:'LBR' },
+      { k:'T', label:'Press temperature', min:120, max:180, step:1, def:150, fmt:function(v){return Math.round(v)+' \u00B0C';} }
+    ],
+    srcExp:'At the optimum (5 MPa / 150 °C): MOR 128.8 MPa · MOE 11.6 GPa · horizontal shear strength 12.9 MPa. At 4 MPa: MOR 149.8 MPa · MOE 11.7 GPa.',
+    srcModel:'At the optimum this model predicts MOR 157.3 MPa, MOE 15.37 GPa and tensile 114.4 MPa — model predictions, not Zheng\u2019s measured values. The readouts above show model and Zheng experimental side by side.',
+    graphs:[ { id:'load', title:'Load vs deflection \u2014 break point marked' } ] },
+  { title:'Invisible Cloud \u2014 TVOC & Indoor Emissions', badge:'MODEL · coupled solver',
+    sub:'Why the LBR board can go indoors and the PF board cannot. In the press, moisture, heat and force act together: lignin and hemicellulose crosslink with the lignin-based resin (LBR), locking free formaldehyde and benzene / toluene / xylene inside the network instead of letting them escape into room air. Two sealed chambers run side by side for 24 h \u2014 watch the purple cloud build over PF while the LBR chamber stays clear.',
+    why:'This is the paper\u2019s indoor-application claim, measured by Zheng et al. 2025: the LBR board emits TVOC 2 µg/m<sup>3</sup>, only 1.6% of the PF board\u2019s 125 µg/m<sup>3</sup>, with formaldehyde 0.21 mg/L (E1 limit 1.5 mg/L) and benzene undetected. The chemistry is visible in the spectra: FTIR aromatic bands at 1596 / 1508 cm<sup>\u22121</sup> fall as lignin crosslinks, the 1735 cm<sup>\u22121</sup> hemicellulose C=O band shifts, XPS O/C drops from 0.45 (PF) to 0.31 (LBR), and crystallinity is lower in LBR (78.79% vs 88.01%) because the crosslinked network disrupts crystal packing. Drop the cure degree and the cloud comes back \u2014 emissions are a cure problem, not just a resin problem.',
+    eq:[
+      ['TVOC ratio (Zheng 2025)','TVOC<sub>LBR</sub> / TVOC<sub>PF</sub> = 2 / 125 = 0.016 \u2014 the LBR board emits 1.6% of the PF board'],
+      ['Chamber build-up','C(t) = C<sub>24</sub>\u00B7(1 \u2212 e<sup>\u2212t/\u03C4</sup>) / (1 \u2212 e<sup>\u221224/\u03C4</sup>),  \u03C4 \u2248 6 h TVOC, 8 h formaldehyde'],
+      ['Crosslink coupling','crosslink % rises with cure \u03B1, press T and moisture synergy (lignin + hemicellulose + LBR) \u2014 free HCHO and BTX stay locked in the network'],
+      ['Surface chemistry (XPS / XRD)','O/C 0.45 (PF) \u2192 0.31 (LBR) \u00B7 crystallinity CrI 78.79% (LBR) vs 88.01% (PF)'],
+      ['FTIR markers','1596 / 1508 cm<sup>\u22121</sup> aromatic skeleton \u2193 as lignin crosslinks \u00B7 1735 cm<sup>\u22121</sup> hemicellulose C=O']
+    ],
+    controls:[
+      { k:'resin', label:'Resin (readouts)', type:'toggle', options:['LBR','PF'], def:'LBR' },
+      { k:'T', label:'Press temperature', min:120, max:180, step:1, def:150, fmt:function(v){return Math.round(v)+' \u00B0C';} },
+      { k:'alpha', label:'Cure degree \u03B1', min:0, max:0.96, step:0.01, def:0.96, fmt:function(v){return Math.round(v*100)+'%';} },
+      { k:'mc', label:'Moisture content', min:6, max:18, step:0.5, def:10, fmt:function(v){return fmt1(v)+'%';} },
+      { k:'expo', label:'Exposure time', min:0, max:24, step:0.5, def:24, fmt:function(v){return fmt1(v)+' h';} }
+    ],
+    srcExp:'LBR board TVOC 2 µg/m<sup>3</sup> = 1.6% of the PF board (125 µg/m<sup>3</sup>); formaldehyde 0.21 mg/L, well under the E1 limit of 1.5 mg/L; benzene undetected in LBR. XPS O/C 0.31 (LBR) vs 0.45 (PF); crystallinity 78.79% (LBR) vs 88.01% (PF); FTIR 1596 / 1508 cm<sup>\u22121</sup> aromatic bands fall as lignin crosslinks.',
+    srcModel:'The 2 and 125 µg/m<sup>3</sup> endpoints at the optimum are Zheng\u2019s measurements. The chamber curves between them, the crosslink % and the emission rise at low cure / low temperature / off-optimum moisture are Dhaka model extrapolations from those anchors \u2014 the live readouts are model values and move with the sliders.',
+    graphs:[ { id:'tvoc', title:'TVOC vs time \u2014 GB/T 44690-2024 Class I line' }, { id:'hcho', title:'Formaldehyde vs time \u2014 E1 line 1.5 mg/L' } ] },
+  { title:'One-Way Street \u2014 Anisotropic Penetration', badge:'MODEL · coupled solver',
+    sub:'Bamboo vessels run one way: along the grain. Permeability along the grain is 10<sup>4</sup>\u201310<sup>6</sup> times the permeability across it (Perr\u00E9 2022), so three liquids \u2014 oil, water and resin \u2014 race down the vessel network and barely move sideways. Water stalls at vessel-cell scars, oil slips through vessels but never enters fibres, and resin speed is set by the Washburn balance of capillary pressure against viscosity.',
+    why:'Penetration is directional, and that is why bundle geometry decides the whole process. Wide bundles keep the long vessel network intact, so resin travels millimetres along the grain in the soak; across the grain it travels almost nothing, which is why strip thickness and cortex removal matter so much in the conventional process. Perr\u00E9 2022 shows only ~8% of vessels are directly connected at 30 min, rising to ~15% via rays, and water is blocked at vessel-cell scars where its apparent contact angle jumps to ~90\u00B0 \u2014 the race above is that anatomy, run live.',
+    eq:[
+      ['Washburn (along-grain)','z<sup>2</sup> = 2\u00B7k\u00B7\u0394P\u00B7t / (\u03BC\u00B7\u03C6) \u2014 the front grows as \u221At'],
+      ['Capillary pressure','\u0394P = 2\u03B3\u00B7cos\u03B8 / r'],
+      ['Anisotropy','k<sub>\u2225</sub> / k<sub>\u22A5</sub> = 10<sup>4</sup>\u201310<sup>6</sup> \u2192 z<sub>\u22A5</sub> = z<sub>\u2225</sub> / \u221A(k<sub>\u2225</sub>/k<sub>\u22A5</sub>)'],
+      ['Vessel connectivity (Perr\u00E9 2022)','vessels 128\u2013196 \u00B5m \u00B7 ~8% directly connected at 30 min \u2192 15% via rays \u00B7 water blocked at vessel-cell scars (apparent \u03B8 \u2248 90\u00B0) \u00B7 oil in vessels only, never in fibres']
+    ],
+    controls:[
+      { k:'liquid', label:'Liquid (readouts)', type:'toggle', options:['resin','oil','water'], def:'resin' },
+      { k:'theta', label:'Contact angle', min:18, max:90, step:1, def:38, fmt:function(v){return Math.round(v)+'\u00B0';} },
+      { k:'Cs', label:'Solid content (resin only)', min:10, max:35, step:1, def:15, fmt:fmtPct },
+      { k:'aniso', label:'Grain anisotropy log\u2081\u2080(k\u2225/k\u22A5)', min:4, max:6, step:0.1, def:4, fmt:function(v){return '10' + supUni(v.toFixed(1)) + ' \u00D7';} },
+      { k:'rp', label:'Pore radius', min:18, max:30, step:1, def:26, fmt:function(v){return Math.round(v)+' \u00B5m';} }
+    ],
+    srcExp:'Perr\u00E9 2022 (project literature base): along-grain permeability 10<sup>4</sup>\u201310<sup>6</sup>\u00D7 cross-grain; vessels 128\u2013196 \u00B5m, ~8% directly connected at 30 min rising to ~15% via rays; water ~50\u00B0 blocked at vessel-cell scars (apparent ~90\u00B0); oil ~20\u00B0 penetrates vessels, no oil in fibres; bubbles trapped in the network.',
+    srcModel:'Front distances are Dhaka model Washburn / Darcy values: resin at 15% SC reaches 3.91 mm along-grain, at 35% SC only 0.86 mm, and PF resin in the narrow-strip geometry 1.86 mm. Oil and water fronts use the same capillary equation with their own viscosity and surface tension, plus the scar-blockage factor for water.',
+    graphs:[ { id:'front', title:'Front distance vs time \u2014 along vs across, \u221At reference' } ] }
+];
+var WHY = SIM_DEFS.map(function(d){ return d.why; });
+
+var cardsEl = document.getElementById('cards');
+var simStates = [], simCards = [];
+SIM_DEFS.forEach(function(def, idx){
+  var sec = document.createElement('section'); sec.className = 'card';
+  var head = document.createElement('div'); head.className = 'card-head';
+  var h = document.createElement('h2');
+  var ns = document.createElement('span'); ns.className = 'num'; ns.textContent = '0' + (idx + 1);
+  h.appendChild(ns); h.appendChild(document.createTextNode(def.title)); head.appendChild(h);
+  var actions = document.createElement('div'); actions.className = 'head-actions';
+  var wb = document.createElement('button'); wb.type = 'button'; wb.className = 'why-btn'; wb.textContent = 'Why this matters'; wb.setAttribute('aria-expanded','false');
+  var b = document.createElement('span'); b.className = 'badge'; b.textContent = def.badge;
+  actions.appendChild(wb); actions.appendChild(b); head.appendChild(actions);
+  sec.appendChild(head);
+  var sub = document.createElement('p'); sub.className = 'sub'; sub.innerHTML = def.sub; sec.appendChild(sub);
+  var why = document.createElement('div'); why.className = 'why'; why.id = 'why-panel-' + idx;
+  var wp = document.createElement('p'); wp.innerHTML = def.why; why.appendChild(wp); sec.appendChild(why);
+  wb.setAttribute('aria-controls', why.id);
+  wb.addEventListener('click', function(){
+    var open = why.classList.toggle('open'); wb.setAttribute('aria-expanded', open ? 'true' : 'false');
+    if (open) simCards.forEach(function(c, i){ if (i !== idx && c.whyEl){ c.whyEl.classList.remove('open'); c.whyBtn.setAttribute('aria-expanded','false'); } });
+  });
+  var vp = document.createElement('div'); vp.className = 'viewport';
+  var simCv = document.createElement('canvas'); simCv.className = 'sim'; simCv.width = 800; simCv.height = 450; simCv.setAttribute('aria-hidden','true');
+  vp.appendChild(simCv); sec.appendChild(vp);
+  var roEl = document.createElement('div'); roEl.className = 'readouts'; sec.appendChild(roEl);
+  if (def.srcExp){
+    var srcbox = document.createElement('div'); srcbox.className = 'srcbox';
+    [['exp', 'Zheng et al. 2025 · Ind. Crops Prod. 233, 121450 — experimental (measured)', def.srcExp],
+     ['mod', 'Dhaka coupled model — predicted (this simulator)', def.srcModel]].forEach(function(pair){
+      var cell = document.createElement('div'); cell.className = 'src';
+      var sl = document.createElement('span'); sl.className = 'src-lab ' + pair[0]; sl.textContent = pair[1]; cell.appendChild(sl);
+      var sp = document.createElement('p'); sp.innerHTML = pair[2]; cell.appendChild(sp);
+      srcbox.appendChild(cell);
+    });
+    sec.appendChild(srcbox);
+  }
+  var mid = document.createElement('div'); mid.className = 'mid';
+  var eqbox = document.createElement('div'); eqbox.className = 'eqbox';
+  var eqh = document.createElement('h3'); eqh.textContent = 'Governing equations \u2014 solved live'; eqbox.appendChild(eqh);
+  def.eq.forEach(function(e){
+    var p = document.createElement('p');
+    var nm = document.createElement('span'); nm.className = 'note'; nm.innerHTML = e[0] + '  ';
+    var eq = document.createElement('span'); eq.className = 'eq'; eq.innerHTML = e[1];
+    p.appendChild(nm); p.appendChild(eq); eqbox.appendChild(p);
+  });
+  mid.appendChild(eqbox);
+  var graphs = document.createElement('div'); graphs.className = 'graphs' + (def.graphs.length > 1 ? '' : '');
+  var graphCvs = {};
+  def.graphs.forEach(function(g){
+    var gb = document.createElement('div'); gb.className = 'graphbox';
+    var gh = document.createElement('h3'); gh.textContent = g.title; gb.appendChild(gh);
+    var cv = document.createElement('canvas'); cv.setAttribute('aria-hidden','true'); gb.appendChild(cv);
+    graphs.appendChild(gb); graphCvs[g.id] = cv;
+  });
+  mid.appendChild(graphs); sec.appendChild(mid);
+  var ctls = document.createElement('div'); ctls.className = 'controls'; sec.appendChild(ctls);
+  var foot = document.createElement('div'); foot.className = 'foot';
+  var cap = document.createElement('p'); cap.className = 'caption'; cap.textContent = '\u2014'; foot.appendChild(cap);
+  var clock = document.createElement('span'); clock.className = 'clock'; foot.appendChild(clock);
+  var footActs = document.createElement('div'); footActs.className = 'foot-actions';
+  var playBtn = document.createElement('button'); playBtn.className = 'play-btn'; playBtn.type = 'button'; playBtn.textContent = 'Pause'; playBtn.setAttribute('aria-label','Pause animation');
+  var rst = document.createElement('button'); rst.className = 'reset'; rst.type = 'button'; rst.textContent = 'Reset';
+  footActs.appendChild(playBtn); footActs.appendChild(rst); foot.appendChild(footActs);
+  sec.appendChild(foot);
+  cardsEl.appendChild(sec);
+  var state = {};
+  def.controls.forEach(function(c){
+    state[c.k] = c.def;
+    var wrap = document.createElement('div'); wrap.className = 'ctl';
+    var lab = document.createElement('div'); lab.className = 'lab';
+    var lb = document.createElement('label'); lb.textContent = c.label; lab.appendChild(lb);
+    var val = document.createElement('span'); val.className = 'val'; lab.appendChild(val);
+    wrap.appendChild(lab);
+    if (c.type === 'toggle'){
+      val.textContent = c.def;
+      var seg = document.createElement('div'); seg.className = 'seg';
+      c.options.forEach(function(opt){
+        var btn = document.createElement('button'); btn.type = 'button'; btn.textContent = opt;
+        if (opt === c.def) btn.className = 'on';
+        btn.addEventListener('click', function(){
+          state[c.k] = opt; val.textContent = opt;
+          seg.querySelectorAll('button').forEach(function(x){ x.classList.toggle('on', x === btn); });
+          onControlChange(idx);
+        });
+        seg.appendChild(btn);
+      });
+      wrap.appendChild(seg); c._valEl = val; c._segEl = seg;
+    } else {
+      val.textContent = c.fmt(c.def);
+      var inp = document.createElement('input'); inp.type = 'range';
+      inp.min = c.min; inp.max = c.max; inp.step = c.step; inp.value = c.def;
+      inp.setAttribute('aria-label', c.label); rangeFill(inp);
+      inp.addEventListener('input', function(){ state[c.k] = parseFloat(inp.value); val.textContent = c.fmt(state[c.k]); rangeFill(inp); onControlChange(idx); });
+      wrap.appendChild(inp); c._valEl = val; c._inputEl = inp;
+    }
+    ctls.appendChild(wrap);
+  });
+  rst.addEventListener('click', function(){
+    def.controls.forEach(function(c){
+      state[c.k] = c.def;
+      if (c.type === 'toggle'){ c._valEl.textContent = c.def; c._segEl.querySelectorAll('button').forEach(function(x){ x.classList.toggle('on', x.textContent === c.def); }); }
+      else { c._inputEl.value = c.def; c._valEl.textContent = c.fmt(c.def); rangeFill(c._inputEl); }
+    });
+    var cc = simCards[idx]; if (cc) cc.elapsed = 0;
+    onControlChange(idx);
+  });
+  playBtn.addEventListener('click', function(){
+    var cc = simCards[idx]; if (!cc) return;
+    cc.playing = !cc.playing;
+    playBtn.textContent = cc.playing ? 'Pause' : 'Play';
+    playBtn.setAttribute('aria-label', cc.playing ? 'Pause animation' : 'Play animation');
+  });
+  simStates.push(state);
+  simCards.push({ def:def, el:sec, simCv:simCv, capEl:cap, clockEl:clock, whyEl:why, whyBtn:wb, roEl:roEl, graphCvs:graphCvs, playing:true, elapsed:0, simTime:0, derived:null, puffs:[], phase:Math.random()*10 });
+});
+function rangeFill(inp){
+  var min = parseFloat(inp.min), max = parseFloat(inp.max), v = parseFloat(inp.value);
+  var pct = max > min ? ((v - min) / (max - min)) * 100 : 0;
+  inp.style.backgroundImage = 'linear-gradient(90deg, #0F766E ' + pct + '%, #E5E7EB ' + pct + '%)';
+}
+function onControlChange(idx){
+  var card = simCards[idx]; card.derived = null;
+  refreshCard(idx);
+}
+</script>
+<script>
+"use strict";
+/* ================================================================
+   Derived coupled values per sim (cached by control tuple)
+   ================================================================ */
+/* Sim 4 emission model — anchored exactly at Zheng 2025 optimum:
+   LBR TVOC 2 µg/m³, PF 125 µg/m³, LBR formaldehyde 0.21 mg/L at
+   α = 0.96, 150 °C, 10% MC; off-optimum cure / T / moisture scale
+   emissions up (less crosslinking → more free volatiles). */
+function emissionFactors(alpha, T, mc){
+  var F = Math.exp(2.2*(0.96 - alpha)) * Math.exp(-0.012*(T - 150)) * (1 + 0.04*Math.abs(mc - 10));
+  var Fh = Math.exp(1.1*(0.96 - alpha)) * Math.exp(-0.006*(T - 150)) * (1 + 0.02*Math.abs(mc - 10));
+  return { F:F, Fh:Fh };
+}
+function derive(idx){
+  var card = simCards[idx];
+  if (card.derived) return card.derived;
+  var s = simStates[idx], d = {};
+  if (idx === 0){
+    var key = 'c1|' + s.Cs + '|' + s.T + '|' + s.theta + '|' + s.P + '|' + s.mc + '|' + s.resin;
+    d = cachedSolve(key, function(){
+      var Cs = s.Cs/100, mc = s.mc/100;
+      var cure = cureSolve(s.T, s.resin, mc, 'wide', 900);
+      var zF = washburnZ(900, Cs, s.resin, s.theta, s.P);
+      var gelT = cure.gelT;
+      function teff(t){ if (gelT === null || t <= gelT) return t; return gelT + (t - gelT) * 0.25; }
+      var teEnd = teff(900), pen = [];
+      for (var t = 0; t <= 900; t += 15) pen.push({ t:t, z:zF * Math.sqrt(teff(t)/teEnd) });
+      var coupled = pressPerformance({ Cs:Cs, P:s.P, T:s.T, mc:mc, bundle:'wide', width:225, resin:s.resin, tEnd:900, soakT:900, theta:s.theta });
+      return { cure:cure, pen:pen, zF:zF, zMm:zF*1000, zPct:zF/HALF_T*100, mu:viscosity(Cs, 298.15, 0, s.resin)*1000,
+               Tg:TgC(mc), alpha:cure.alpha, gelT:gelT, rho:coupled.rho, D:coupled.D, MOR:coupled.MOR, clog:clogC(Cs) };
+    });
+  } else if (idx === 1){
+    var key1 = 'c2|' + s.P + '|' + s.T + '|' + s.mc + '|' + s.w + '|' + s.hold;
+    d = cachedSolve(key1, function(){
+      var bundle = s.w >= 100 ? 'wide' : 'narrow', mc = s.mc/100;
+      var tEnd = Math.max(s.hold * 60, 30);
+      var sol = solvePress({ Cs:0.15, P:s.P, T:s.T, mc:mc, bundle:bundle, resin:'LBR', tEnd:tEnd, series:true, dt:1 });
+      var dmg = damageCalc(s.P, s.T, mc, s.w);
+      var ser = pressSeries(s.T, s.P, mc, s.w, s.hold);
+      var vapPeak = 0; ser.forEach(function(p){ if (p.vap > vapPeak) vapPeak = p.vap; });
+      var z = washburnZ(900, 0.15, 'LBR', 38, 5, bundle);
+      var epsN = clamp(sol.eps / EPS_MAX, 0, 1);
+      return { sol:sol, ser:ser, rho:sol.rho, eps:sol.eps, alpha:sol.alpha, D:dmg.D, sigmaFrac:dmg.sigmaFrac,
+               porosity:(1 - sol.rho/RHO_S)*100, vapPeak:vapPeak, coreFill:z/HALF_T*100, bundle:bundle,
+               paren:48.5 - (48.5-14.7)*epsN, vessel:9.5 - (9.5-0.4)*epsN,
+               steamRisk:(mc > 0.11 && s.T > 160), tEnd:tEnd };
+    });
+  } else if (idx === 2) {
+    var key2 = 'c3|' + s.P + '|' + s.w + '|' + s.Cs + '|' + s.resin + '|' + s.T;
+    d = cachedSolve(key2, function(){
+      var bundle = s.w >= 100 ? 'wide' : 'narrow';
+      var perf = pressPerformance({ Cs:s.Cs/100, P:s.P, T:s.T, mc:0.10, bundle:bundle, width:s.w, resin:s.resin, tEnd:900, soakT:900 });
+      var Fbreak = perf.MOR * 0.38; /* kN, for the 40 x 20 mm test beam */
+      var dBreak = (2.2 + (perf.MOR/Math.max(perf.MOE,1)) * 0.55) * (1 - 0.55*perf.D);
+      return { perf:perf, MOR:perf.MOR, MOE:perf.MOE, tensile:perf.tensile, D:perf.D, rho:perf.rho,
+               alpha:perf.alpha, fill:perf.pfe, Fbreak:Fbreak, dBreak:dBreak, bundle:bundle };
+    });
+  } else if (idx === 3) {
+    var key3 = 'c4|' + s.resin + '|' + s.T + '|' + s.alpha + '|' + s.mc + '|' + s.expo;
+    d = cachedSolve(key3, function(){
+      var ef = emissionFactors(s.alpha, s.T, s.mc), F = ef.F, Fh = ef.Fh;
+      function tvocAt(base, h){ return base * F * (1 - Math.exp(-Math.max(h,0)/6)) / (1 - Math.exp(-24/6)); }
+      function hchoAt(base, h){ return base * Fh * (1 - Math.exp(-Math.max(h,0)/8)) / (1 - Math.exp(-24/8)); }
+      var tvocL = [], tvocP = [], hchoL = [], hchoP = [];
+      for (var h = 0; h <= 24.01; h += 0.5){ tvocL.push({ t:h, v:tvocAt(2, h) }); tvocP.push({ t:h, v:tvocAt(125, h) }); hchoL.push({ t:h, v:hchoAt(0.21, h) }); hchoP.push({ t:h, v:hchoAt(1.35, h) }); }
+      var selLBR = s.resin === 'LBR';
+      var cross = clamp(s.alpha*100*(0.90 + 0.10*((s.T - 120)/60)) - 0.8*Math.abs(s.mc - 10), 0, 98);
+      var fOC = clamp((s.alpha/0.96)*(0.85 + 0.15*((s.T - 120)/30)), 0, 1.05);
+      var ocLBR = 0.45 - 0.14*fOC, ocPF = 0.45 - 0.005*(fOC - 1);
+      return { tvocL:tvocL, tvocP:tvocP, hchoL:hchoL, hchoP:hchoP,
+        tvocLBRat:function(h){ return tvocAt(2, h); }, tvocPFat:function(h){ return tvocAt(125, h); },
+        tvocSel:tvocAt(selLBR ? 2 : 125, s.expo), hchoSel:hchoAt(selLBR ? 0.21 : 1.35, s.expo),
+        tvocPF24:tvocAt(125, 24), hchoPF24:hchoAt(1.35, 24),
+        pctPF:selLBR ? 1.6 : 100, cross:cross, oc:selLBR ? ocLBR : ocPF, ocLBR:ocLBR, ocPF:ocPF,
+        cri:selLBR ? 78.79 : 88.01, selLBR:selLBR };
+    });
+  } else {
+    var key4 = 'c5|' + s.liquid + '|' + s.theta + '|' + s.Cs + '|' + s.aniso + '|' + s.rp;
+    d = cachedSolve(key4, function(){
+      var r = s.rp, aniso = Math.pow(10, s.aniso);
+      function generic(muPas, gamma, thetaDeg, kFac){
+        var keff = 3.2e-14 * Math.pow(r/26, 2) * kFac;
+        var dP = 2 * gamma * Math.cos(thetaDeg * Math.PI/180) / (r * 1e-6);
+        return Math.sqrt(Z0*Z0 + 2 * keff * Math.max(dP, 0) * 900 / (muPas * PHI0)) * 1000;
+      }
+      var zResin = washburnZ(900, s.Cs/100, 'LBR', s.theta, 5, 'wide') * 1000 * Math.sqrt(r/26);
+      var zOil = generic(0.012, 0.032, s.theta, 1);
+      var zWater = generic(0.001, 0.072, s.theta, 0.02); /* scar blockage + trapped bubbles */
+      var fronts = { resin:zResin, oil:zOil, water:zWater };
+      var sel = s.liquid, zAlong = fronts[sel];
+      var scar = 1;
+      if (sel === 'water'){ var cA = Math.max(Math.cos(s.theta * Math.PI/180), 0.01); scar = clamp(Math.cos(Math.min(90, s.theta + 40) * Math.PI/180) / cA, 0, 1); }
+      var zAcross = zAlong / Math.sqrt(aniso) * (sel === 'oil' ? 0.4 : scar);
+      var gammaSel = sel === 'oil' ? 0.032 : sel === 'water' ? 0.072 : 0.052;
+      var capP = 2 * gammaSel * Math.cos(s.theta * Math.PI/180) / (r * 1e-6) / 1000;
+      var muSel = sel === 'oil' ? 12 : sel === 'water' ? 1.0 : viscosity(s.Cs/100, 298.15, 0, 'LBR') * 1000;
+      var conn = clamp((sel === 'water' ? 8.2 : 15.0) + (r - 26) * 0.3, 4, 20);
+      function frontAt(zF, t, liq){
+        if (liq === 'water') return zF * (1 - Math.exp(-t/250)) / (1 - Math.exp(-900/250));
+        return zF * Math.sqrt(clamp(t, 0, 900) / 900);
+      }
+      var alongPts = [], acrossPts = [], refPts = [];
+      var refFinal = sel === 'water' ? Math.min(generic(0.001, 0.072, s.theta, 1), 12) : zAlong;
+      for (var t = 0; t <= 900; t += 30){
+        alongPts.push([t/60, frontAt(zAlong, t, sel)]);
+        acrossPts.push([t/60, frontAt(zAcross, t, sel)]);
+        refPts.push([t/60, refFinal * Math.sqrt(t/900)]);
+      }
+      return { fronts:fronts, zAlong:zAlong, zAcross:zAcross, capP:capP, muSel:muSel, conn:conn,
+               alongPts:alongPts, acrossPts:acrossPts, refPts:refPts, refFinal:refFinal, frontAt:frontAt, sel:sel };
+    });
+  }
+  card.derived = d;
+  return d;
+}
+function refreshCard(idx){
+  var card = simCards[idx], s = simStates[idx], d = derive(idx), rows = [];
+  if (idx === 0){
+    rows = [['viscosity (model)', d.mu.toFixed(1) + ' mPa\u00B7s'], ['penetration (model)', d.zMm.toFixed(2) + ' mm / ' + d.zPct.toFixed(1) + '%'],
+            ['cure \u03B1 (model)', (d.alpha*100).toFixed(1) + '%'], ['time to gel', d.gelT !== null ? (d.gelT/60).toFixed(2) + ' min' : 'no gel in 15 min'],
+            ['T<sub>g</sub>', d.Tg.toFixed(1) + ' \u00B0C']];
+    card.capEl.textContent = 'front ' + d.zMm.toFixed(2) + ' mm \u00B7 cure ' + (d.alpha*100).toFixed(1) + '%' + (d.gelT !== null ? ' \u00B7 gel ' + (d.gelT/60).toFixed(2) + ' min' : ' \u00B7 no gel');
+  } else if (idx === 1){
+    rows = [['density (model)', d.rho.toFixed(3) + ' g/cm<sup>3</sup>'], ['porosity', d.porosity.toFixed(1) + '%'],
+            ['damage', (d.D*100).toFixed(1) + '%'], ['vapour peak', Math.round(d.vapPeak) + ' kPa'], ['core fill', d.coreFill.toFixed(1) + '%'],
+            ['fracture limit', d.sigmaFrac.toFixed(2) + ' MPa']];
+    card.capEl.textContent = '\u03C1 ' + d.rho.toFixed(3) + ' g/cm\u00B3 \u00B7 damage ' + (d.D*100).toFixed(1) + '%' + (d.steamRisk ? ' \u00B7 steam blow risk' : '');
+  } else if (idx === 2) {
+    rows = [['MOR — model · Zheng exp.', d.MOR.toFixed(1) + ' · 128.8 MPa'], ['MOE — model · Zheng exp.', d.MOE.toFixed(2) + ' · 11.6 GPa'], ['tensile (model)', d.tensile.toFixed(1) + ' MPa'],
+            ['damage', (d.D*100).toFixed(1) + '%'], ['density (model)', d.rho.toFixed(3) + ' g/cm<sup>3</sup>']];
+    card.capEl.textContent = 'model MOR ' + d.MOR.toFixed(1) + ' MPa \u00B7 breaks at ' + d.Fbreak.toFixed(1) + ' kN / ' + d.dBreak.toFixed(1) + ' mm';
+  } else if (idx === 3) {
+    rows = [['TVOC at exposure (model)', d.tvocSel.toFixed(1) + ' µg/m<sup>3</sup>'], ['formaldehyde', d.hchoSel.toFixed(2) + ' mg/L'],
+            ['% of PF board', d.pctPF.toFixed(1) + '%'], ['O/C ratio (XPS)', d.oc.toFixed(2)],
+            ['crosslink', d.cross.toFixed(1) + '%'], ['crystallinity CrI', d.cri.toFixed(2) + '%']];
+    card.capEl.textContent = s.resin + ' TVOC ' + d.tvocSel.toFixed(1) + ' µg/m³ \u00B7 formaldehyde ' + d.hchoSel.toFixed(2) + ' mg/L' + (d.selLBR ? ' \u00B7 benzene undetected' : ' \u00B7 benzene / toluene / xylene escaping');
+  } else {
+    rows = [['front along-grain', d.zAlong.toFixed(2) + ' mm'], ['front across-grain', d.zAcross.toFixed(3) + ' mm'],
+            ['capillary pressure', d.capP.toFixed(2) + ' kPa'], ['connected vessels', d.conn.toFixed(1) + '%'],
+            ['viscosity', d.muSel.toFixed(1) + ' mPa\u00B7s']];
+    card.capEl.textContent = s.liquid + ' front ' + d.zAlong.toFixed(2) + ' mm along \u00B7 ' + d.zAcross.toFixed(3) + ' mm across \u00B7 \u0394P ' + d.capP.toFixed(2) + ' kPa';
+  }
+  if (idx === 0) rows.push(['also coupled \u2192', 'density ' + d.rho.toFixed(3) + ' g/cm<sup>3</sup> \u00B7 damage ' + (d.D*100).toFixed(1) + '% \u00B7 MOR ' + d.MOR.toFixed(1) + ' MPa']);
+  if (idx === 1) rows.push(['also coupled \u2192', 'cure ' + (d.alpha*100).toFixed(1) + '% \u00B7 parenchyma ' + d.paren.toFixed(1) + '% \u00B7 vessels ' + d.vessel.toFixed(1) + '%']);
+  if (idx === 2) rows.push(['also coupled \u2192', 'cure ' + (d.alpha*100).toFixed(1) + '% \u00B7 resin fill ' + d.fill.toFixed(1) + '%']);
+  if (idx === 3) rows.push(['also coupled \u2192', 'O/C LBR ' + d.ocLBR.toFixed(2) + ' vs PF ' + d.ocPF.toFixed(2) + ' \u00B7 FTIR 1596 / 1508 cm<sup>\u22121</sup> fall as crosslink rises \u00B7 E1 limit 1.5 mg/L']);
+  if (idx === 4) rows.push(['also coupled \u2192', 'permeability ratio 10<sup>' + simStates[4].aniso.toFixed(1) + '</sup> \u00B7 PF resin (narrow geometry) reaches 1.86 mm \u00B7 oil never enters fibres']);
+  card.roEl.innerHTML = rows.map(function(r, i){
+    return '<span class="ro' + (i === rows.length - 1 && rows.length > 5 ? ' coupled' : '') + '">' + r[0] + ' <b>' + r[1] + '</b></span>';
+  }).join('');
+  drawGraphs(idx);
+  drawScene(idx);
+}
+/* ================================================================
+   Live graphs — full solver curves with a moving time cursor
+   ================================================================ */
+function setupCanvas(cv, hCss){
+  var W = cv.clientWidth || 600, H = hCss || 118;
+  var dpr = Math.min(window.devicePixelRatio || 1, 2);
+  if (cv.width !== Math.round(W*dpr) || cv.height !== Math.round(H*dpr)){ cv.width = Math.round(W*dpr); cv.height = Math.round(H*dpr); }
+  var cx = cv.getContext('2d'); cx.setTransform(dpr,0,0,dpr,0,0);
+  return { cx:cx, W:W, H:H };
+}
+function graphFrame(cv, o){
+  var g = setupCanvas(cv), cx = g.cx, W = g.W, H = g.H;
+  var padL = 40, padR = 10, padT = 8, padB = 18, iw = W - padL - padR, ih = H - padT - padB;
+  cx.clearRect(0,0,W,H);
+  cx.font = '10px system-ui,sans-serif'; cx.fillStyle = '#9CA3AF'; cx.strokeStyle = '#EEF0F2'; cx.lineWidth = 1;
+  for (var i = 0; i <= 2; i++){
+    var gy = padT + ih * i/2, val = o.ymax * (1 - i/2);
+    cx.beginPath(); cx.moveTo(padL, gy); cx.lineTo(padL + iw, gy); cx.stroke();
+    cx.fillText(val.toFixed(o.ymax <= 1 ? 2 : 0), 4, gy + 3);
+  }
+  cx.strokeStyle = '#D1D5DB'; cx.strokeRect(padL, padT, iw, ih);
+  cx.fillText(o.xlab, padL + iw - 52, H - 5);
+  function X(t){ return padL + iw * clamp(t / o.xmax, 0, 1); }
+  function Y(v){ return padT + ih * (1 - clamp(v / o.ymax, 0, 1)); }
+  if (o.hline != null){
+    cx.strokeStyle = '#DC2626'; cx.setLineDash([4,3]); cx.beginPath(); cx.moveTo(padL, Y(o.hline)); cx.lineTo(padL + iw, Y(o.hline)); cx.stroke(); cx.setLineDash([]);
+    cx.fillStyle = '#DC2626'; cx.fillText(o.hlab || '', padL + 6, Y(o.hline) - 4); cx.fillStyle = '#9CA3AF';
+  }
+  if (o.vline != null){
+    cx.strokeStyle = '#DC2626'; cx.setLineDash([4,3]); cx.beginPath(); cx.moveTo(X(o.vline), padT); cx.lineTo(X(o.vline), padT + ih); cx.stroke(); cx.setLineDash([]);
+    cx.fillStyle = '#DC2626'; cx.fillText(o.vlab || '', X(o.vline) + 4, padT + 10); cx.fillStyle = '#9CA3AF';
+  }
+  o.lines.forEach(function(L){
+    cx.strokeStyle = L.col; cx.lineWidth = 1.8; cx.beginPath();
+    L.pts.forEach(function(p, i){ var x = X(p[0]), y = Y(p[1]); if (i === 0) cx.moveTo(x, y); else cx.lineTo(x, y); });
+    cx.stroke();
+    if (L.lab){ var lp = L.pts[L.pts.length - 1]; cx.fillStyle = L.col; cx.fillText(L.lab, X(lp[0]) - 34, Y(lp[1]) - 5); cx.fillStyle = '#9CA3AF'; }
+  });
+  if (o.cursor != null){
+    cx.strokeStyle = 'rgba(17,24,39,0.45)'; cx.lineWidth = 1; cx.beginPath(); cx.moveTo(X(o.cursor), padT); cx.lineTo(X(o.cursor), padT + ih); cx.stroke();
+  }
+  if (o.breakPt){
+    cx.fillStyle = '#DC2626'; cx.beginPath(); cx.arc(X(o.breakPt[0]), Y(o.breakPt[1]), 4, 0, 6.29); cx.fill();
+    cx.fillText('break', X(o.breakPt[0]) + 7, Y(o.breakPt[1]) - 5);
+  }
+  return g;
+}
+function drawGraphs(idx){
+  var card = simCards[idx]; if (!card.graphCvs) return;
+  var s = simStates[idx], d = derive(idx), tCur = card.simTime;
+  if (idx === 0){
+    if (card.graphCvs.pen) graphFrame(card.graphCvs.pen, { xmax:15, ymax:4, xlab:'time (min)', cursor:tCur/60,
+      vline:(d.gelT !== null ? d.gelT/60 : null), vlab:'gel',
+      lines:[{ col:'#0F766E', pts:d.pen.map(function(p){ return [p.t/60, p.z*1000]; }) }] });
+    if (card.graphCvs.cure) graphFrame(card.graphCvs.cure, { xmax:15, ymax:1, xlab:'time (min)', cursor:tCur/60, hline:0.62, hlab:'gel 0.62',
+      lines:[{ col:'#B45309', pts:d.cure.series.map(function(p){ return [p.t/60, p.alpha]; }) }] });
+  } else if (idx === 1){
+    var xm = Math.max(s.hold, 1);
+    if (card.graphCvs.temp) graphFrame(card.graphCvs.temp, { xmax:xm, ymax:200, xlab:'time (min)', cursor:tCur/60,
+      lines:[{ col:'#DC2626', lab:'surface', pts:d.ser.map(function(p){ return [p.t/60, p.Ts]; }) },
+             { col:'#2563EB', lab:'core', pts:d.ser.map(function(p){ return [p.t/60, p.Tc]; }) }] });
+    var vy = Math.max(200, Math.ceil(d.vapPeak/200)*200);
+    if (card.graphCvs.vap) graphFrame(card.graphCvs.vap, { xmax:xm, ymax:vy, xlab:'time (min)', cursor:tCur/60,
+      lines:[{ col:'#7C3AED', pts:d.ser.map(function(p){ return [p.t/60, p.vap]; }) }] });
+  } else if (idx === 2) {
+    if (card.graphCvs.load){
+      var pts = [], N = 40;
+      for (var i = 0; i <= N; i++){ var dd = d.dBreak * i/N; pts.push([dd, d.Fbreak * Math.pow(i/N, 0.92)]); }
+      graphFrame(card.graphCvs.load, { xmax:Math.max(10, d.dBreak*1.25), ymax:Math.max(50, d.Fbreak*1.25), xlab:'deflection (mm)',
+        breakPt:[d.dBreak, d.Fbreak], cursor:null,
+        lines:[{ col:'#0F766E', pts:pts }] });
+    }
+  } else if (idx === 3) {
+    var tH = clamp(card.simTime, 0, 24);
+    if (card.graphCvs.tvoc) graphFrame(card.graphCvs.tvoc, { xmax:24, ymax:Math.max(150, d.tvocPF24*1.15), xlab:'time (h)', cursor:tH, hline:50, hlab:'Class I',
+      lines:[{ col:'#7C3AED', lab:'PF', pts:d.tvocP.map(function(p){ return [p.t, p.v]; }) },
+             { col:'#0F766E', lab:'LBR', pts:d.tvocL.map(function(p){ return [p.t, p.v]; }) }] });
+    if (card.graphCvs.hcho) graphFrame(card.graphCvs.hcho, { xmax:24, ymax:Math.max(1.8, d.hchoPF24*1.15), xlab:'time (h)', cursor:tH, hline:1.5, hlab:'E1 1.5',
+      lines:[{ col:'#7C3AED', lab:'PF', pts:d.hchoP.map(function(p){ return [p.t, p.v]; }) },
+             { col:'#0F766E', lab:'LBR', pts:d.hchoL.map(function(p){ return [p.t, p.v]; }) }] });
+  } else {
+    if (card.graphCvs.front) graphFrame(card.graphCvs.front, { xmax:15, ymax:Math.max(5, d.zAlong*1.25, d.refFinal*1.05), xlab:'time (min)', cursor:tCur/60,
+      lines:[{ col:'#9CA3AF', lab:'\u221At ref', pts:d.refPts },
+             { col:'#B45309', lab:'along', pts:d.alongPts },
+             { col:'#2563EB', lab:'across', pts:d.acrossPts }] });
+  }
+}
+</script>
+<script>
+"use strict";
+/* ================================================================
+   Scenes — colourful 2D / 2.5D canvas, no WebGL, no cameras.
+   Every scene is drawn from the live solver state at the card's
+   current sim time, so sliders change motion and colour at once.
+   ================================================================ */
+var LW = 800, LH = 450;
+function rr(cx,x,y,w,h,r){ cx.beginPath(); cx.moveTo(x+r,y); cx.arcTo(x+w,y,x+w,y+h,r); cx.arcTo(x+w,y+h,x,y+h,r); cx.arcTo(x,y+h,x,y,r); cx.arcTo(x,y,x+w,y,r); cx.closePath(); }
+function pill(cx,x,y,text,bg,fg,font){ cx.font = font || '700 15px system-ui,sans-serif'; var w = cx.measureText(text).width + 26; cx.fillStyle = bg; rr(cx,x-w/2,y-16,w,32,16); cx.fill(); cx.fillStyle = fg; cx.textAlign='center'; cx.textBaseline='middle'; cx.fillText(text,x,y+1); return w; }
+function lab(cx,x,y,text,fg,font,align){
+  /* Rich labels: _{...} draws a true subscript, ^{...} a true superscript
+     (smaller font, shifted baseline) since canvas fillText has no sub/sup. */
+  var F = font || '600 13px system-ui,sans-serif';
+  if (text.indexOf('_{') === -1 && text.indexOf('^{') === -1){ cx.font = F; cx.fillStyle = fg; cx.textAlign = align || 'center'; cx.textBaseline = 'middle'; cx.fillText(text, x, y); return; }
+  var mm = /(\d+(?:\.\d+)?)px/.exec(F), size = mm ? parseFloat(mm[1]) : 13;
+  var fam = F.replace(/^.*?px\s*/, ''), wt = F.split(' ')[0] || '600';
+  var segs = [], buf = '', i = 0;
+  while (i < text.length){
+    if ((text[i] === '_' || text[i] === '^') && text[i + 1] === '{'){
+      var isSup = text[i] === '^', j = text.indexOf('}', i + 2);
+      if (j === -1){ buf += text[i]; i++; continue; }
+      if (buf){ segs.push({ t:buf, m:0 }); buf = ''; }
+      segs.push({ t:text.slice(i + 2, j), m:isSup ? 1 : -1 }); i = j + 1;
+    } else { buf += text[i]; i++; }
+  }
+  if (buf) segs.push({ t:buf, m:0 });
+  var small = Math.max(8, size * 0.74), total = 0;
+  segs.forEach(function(sg){ cx.font = wt + ' ' + (sg.m === 0 ? size : small) + 'px ' + fam; sg.w = cx.measureText(sg.t).width; total += sg.w; });
+  var sx = align === 'left' ? x : align === 'right' ? x - total : x - total / 2;
+  cx.fillStyle = fg; cx.textAlign = 'left'; cx.textBaseline = 'middle';
+  segs.forEach(function(sg){
+    cx.font = wt + ' ' + (sg.m === 0 ? size : small) + 'px ' + fam;
+    cx.fillText(sg.t, sx, y + (sg.m === 1 ? -size * 0.34 : sg.m === -1 ? size * 0.20 : 0));
+    sx += sg.w;
+  });
+}
+function bgGrad(cx,stops){ var g = cx.createLinearGradient(0,0,0,LH); stops.forEach(function(s){ g.addColorStop(s[0],s[1]); }); cx.fillStyle=g; cx.fillRect(0,0,LW,LH); }
+function hexPath(cx,x,y,r,sy){ cx.beginPath(); for (var i=0;i<6;i++){ var a = Math.PI/3*i + Math.PI/6, px = x + r*Math.cos(a), py = y + r*Math.sin(a)*(sy||1); if (i===0) cx.moveTo(px,py); else cx.lineTo(px,py); } cx.closePath(); }
+function drawScene(idx){
+  var card = simCards[idx], cv = card.simCv, cx = cv.getContext('2d');
+  cx.setTransform(1,0,0,1,0,0); cx.clearRect(0,0,LW,LH);
+  var s = simStates[idx], d = derive(idx);
+  try {
+    if (idx === 0) drawS1(cx, card, s, d);
+    else if (idx === 1) drawS2(cx, card, s, d);
+    else if (idx === 2) drawS3(cx, card, s, d);
+    else if (idx === 3) drawS4(cx, card, s, d);
+    else drawS5(cx, card, s, d);
+  } catch(e){ /* one scene must never freeze the others */ }
+  var mins = (card.simTime/60);
+  card.clockEl.textContent = idx === 2 ? '' : idx === 3 ? ('t = ' + card.simTime.toFixed(1) + ' h') : ('t = ' + mins.toFixed(1) + ' min');
+}
+
+/* ---------- Sim 1 · pore network, resin front vs gel point ---------- */
+var S1_PARTS = null, S1_PAIRS = [];
+function s1Parts(){
+  if (S1_PARTS) return S1_PARTS;
+  var R = seededRand(1234); S1_PARTS = [];
+  for (var i = 0; i < 80; i++) S1_PARTS.push({ fx:0.03 + R()*0.94, fy:0.06 + R()*0.88, r:2 + R()*2.6, ph:R()*6.28 });
+  for (var a = 0; a < S1_PARTS.length; a++) for (var b = a + 1; b < S1_PARTS.length; b++){
+    var dx = (S1_PARTS[a].fx - S1_PARTS[b].fx) * 560, dy = (S1_PARTS[a].fy - S1_PARTS[b].fy) * 250;
+    if (dx*dx + dy*dy < 2100) S1_PAIRS.push([a, b]);
+  }
+  return S1_PARTS;
+}
+function drawS1(cx, card, s, d){
+  bgGrad(cx,[[0,'#FFF8EC'],[1,'#FBEED3']]);
+  var t = card.simTime, cur = seriesAt(d.cure.series, t) || { alpha:0, Tr:25 };
+  var alpha = cur.alpha, gelled = d.gelT !== null && t >= d.gelT;
+  var penNow = seriesAt(d.pen.map(function(p){ return { t:p.t, z:p.z }; }), t);
+  var frac = clamp((penNow ? penNow.z : 0) / HALF_T, 0, 1);
+  var X0 = 36, X1 = 596, Y0 = 84, Y1 = 352, W = X1 - X0, H = Y1 - Y0;
+  lab(cx, X0 + W/2, 34, 'BAMBOO MICROSTRUCTURE \u2014 TRANSVERSE SECTION', '#8A6D1F', '700 13px system-ui,sans-serif');
+  /* honeycomb parenchyma */
+  cx.save(); rr(cx, X0, Y0, W, H, 10); cx.clip();
+  cx.fillStyle = '#F1DCA6'; cx.fillRect(X0, Y0, W, H);
+  var hr = 25, hw = hr * 1.74, hh = hr * 1.5, row = 0;
+  cx.strokeStyle = 'rgba(146,104,32,0.55)'; cx.lineWidth = 2; cx.fillStyle = '#F7E7BC';
+  for (var yy = Y0 + hr*0.4; yy < Y1 + hr; yy += hh, row++){
+    for (var xx = X0 + (row % 2 ? hw/2 : 0) + hr*0.4; xx < X1 + hw; xx += hw){ hexPath(cx, xx, yy, hr*0.86); cx.fill(); cx.stroke(); }
+  }
+  /* metaxylem vessels — resin races further along these */
+  [138, 282].forEach(function(vy){
+    cx.fillStyle = '#D9B96A'; rr(cx, X0 + 6, vy - 24, W - 12, 48, 24); cx.fill();
+    cx.fillStyle = '#FDF3D0'; rr(cx, X0 + 14, vy - 16, W - 28, 32, 16); cx.fill();
+  });
+  /* resin body up to the front */
+  var fx = X0 + frac * W, resinCol = colC(alpha);
+  cx.globalAlpha = 0.88; cx.fillStyle = resinCol; cx.fillRect(X0, Y0, frac * W, H); cx.globalAlpha = 1;
+  [138, 282].forEach(function(vy){
+    var vf = clamp(frac * 1.3, 0, 1);
+    cx.fillStyle = resinCol; rr(cx, X0 + 14, vy - 16, Math.max(0, vf * (W - 28)), 32, 16); cx.fill();
+  });
+  /* crosslinking particles inside the resin */
+  var parts = s1Parts(), muRel = Math.max(d.mu / 20.92, 0.05);
+  var jig = (1 - alpha) * 2.2 / Math.sqrt(muRel);
+  var pos = parts.map(function(p){
+    var px = X0 + p.fx * frac * W, py = Y0 + p.fy * H;
+    return [px + Math.sin(card.elapsed * 2 + p.ph) * jig, py + Math.cos(card.elapsed * 1.7 + p.ph * 2) * jig, p];
+  });
+  if (alpha > 0.12){
+    cx.strokeStyle = 'rgba(59,29,14,' + (alpha * 0.55).toFixed(2) + ')'; cx.lineWidth = 1.2;
+    S1_PAIRS.forEach(function(pr){
+      var A = pos[pr[0]], B = pos[pr[1]];
+      if (A[0] < fx && B[0] < fx){ cx.beginPath(); cx.moveTo(A[0], A[1]); cx.lineTo(B[0], B[1]); cx.stroke(); }
+    });
+  }
+  pos.forEach(function(P){
+    if (P[0] > fx - 2) return;
+    cx.fillStyle = colC(clamp(alpha + 0.12, 0, 1)); cx.beginPath(); cx.arc(P[0], P[1], P[2].r, 0, 6.29); cx.fill();
+    cx.fillStyle = 'rgba(255,255,255,0.5)'; cx.beginPath(); cx.arc(P[0] - 1, P[1] - 1, P[2].r * 0.4, 0, 6.29); cx.fill();
+  });
+  /* clogging bridges just ahead of the front */
+  var clogAmt = clamp((s.Cs - 18) / 17, 0, 1);
+  if (clogAmt > 0.03){
+    var R2 = seededRand(77);
+    cx.fillStyle = '#5B2A0F';
+    var n = Math.round(46 * clogAmt);
+    for (var i = 0; i < n; i++){ var cxp = fx + 4 + R2() * 26, cyp = Y0 + R2() * H; cx.beginPath(); cx.arc(cxp, cyp, 2.6 + R2() * 2.4, 0, 6.29); cx.fill(); }
+    lab(cx, clamp(fx + 66, 120, 560), Y0 - 14, 'pore throats clogging \u2014 k_{eff} \u00D7 ' + d.clog.toFixed(2), '#7C2D12', '700 12.5px system-ui,sans-serif');
+  }
+  /* meniscus front */
+  cx.strokeStyle = '#7C2D12'; cx.lineWidth = 3; cx.beginPath();
+  for (var my = Y0; my <= Y1; my += 8){ var mx = fx + Math.sin(my * 0.11 + t * 0.7) * 3.5; if (my === Y0) cx.moveTo(mx, my); else cx.lineTo(mx, my); }
+  cx.stroke();
+  cx.restore();
+  cx.strokeStyle = '#B98A44'; cx.lineWidth = 2; rr(cx, X0, Y0, W, H, 10); cx.stroke();
+  lab(cx, clamp(fx, 70, 560), Y1 + 24, 'resin front ' + ((penNow ? penNow.z : 0) * 1000).toFixed(2) + ' mm', '#7C2D12', '700 13.5px system-ui,sans-serif');
+  lab(cx, X0 + W/2, Y1 + 46, 'parenchyma honeycomb \u00B7 metaxylem vessels carry resin furthest', '#8A6D1F', '600 12px system-ui,sans-serif');
+  /* right rail: Tg thermometer + cure gauge */
+  var tx = 688, tTop = 96, tBot = 300, tgF = clamp((d.Tg - 25) / 155, 0, 1), trF = clamp((cur.Tr - 25) / 155, 0, 1);
+  cx.fillStyle = 'rgba(255,255,255,0.9)'; rr(cx, tx - 14, tTop - 12, 28, tBot - tTop + 46, 14); cx.fill(); cx.strokeStyle = '#C7B299'; cx.stroke();
+  cx.fillStyle = colH(cur.Tr); rr(cx, tx - 5, tBot - (tBot - tTop) * trF, 10, (tBot - tTop) * trF + 14, 5); cx.fill();
+  cx.beginPath(); cx.arc(tx, tBot + 20, 15, 0, 6.29); cx.fill();
+  var tgY = tBot - (tBot - tTop) * tgF;
+  cx.strokeStyle = '#DC2626'; cx.lineWidth = 3; cx.beginPath(); cx.moveTo(tx - 19, tgY); cx.lineTo(tx + 19, tgY); cx.stroke();
+  lab(cx, tx, tgY - 15, 'T_{g} ' + d.Tg.toFixed(1) + ' \u00B0C', '#B91C1C', '700 12px system-ui,sans-serif');
+  lab(cx, tx, 356, 'resin ' + Math.round(cur.Tr) + ' \u00B0C', '#37474F', '700 12.5px system-ui,sans-serif');
+  lab(cx, tx, 382, '\u03B1 ' + (alpha * 100).toFixed(0) + '% cured', '#7C2D12', '700 12.5px system-ui,sans-serif');
+  cx.fillStyle = '#E7E5E4'; rr(cx, 636, 392, 104, 10, 5); cx.fill();
+  cx.fillStyle = colC(alpha); rr(cx, 636, 392, 104 * clamp(alpha, 0, 1), 10, 5); cx.fill();
+  cx.strokeStyle = '#DC2626'; cx.beginPath(); cx.moveTo(636 + 104 * 0.62, 389); cx.lineTo(636 + 104 * 0.62, 405); cx.stroke();
+  lab(cx, 688, 418, 'gel 0.62', '#B91C1C', '600 11px system-ui,sans-serif');
+  var state = alpha >= 0.97 ? 'CURED \u2014 GLASSY NETWORK' : gelled ? 'GELLED \u2014 FRONT STALLED' : 'LIQUID \u2014 FRONT ADVANCING';
+  /* state pill along the top-right of the slab */
+  pill(cx, 688, 40, gelled || alpha >= 0.97 ? (alpha >= 0.97 ? 'CURED' : 'GELLED') : 'LIQUID', gelled || alpha >= 0.97 ? '#7C2D12' : '#0F766E', '#FFFFFF', '700 12.5px system-ui,sans-serif');
+  lab(cx, X0 + W/2, 62, state, gelled ? '#B91C1C' : '#0F766E', '700 12px system-ui,sans-serif');
+}
+
+/* ---------- Sim 2 · layered 2.5D press cutaway ---------- */
+function drawS2(cx, card, s, d){
+  bgGrad(cx,[[0,'#F4F7FA'],[1,'#DFE8EF']]);
+  var t = card.simTime, cur = seriesAt(d.ser, t) || d.ser[d.ser.length - 1] || { Ts:s.T, Tc:25, vap:0 };
+  var solNow = seriesAt(d.sol.series, t) || { eps:0 };
+  var eps = solNow.eps || 0, epsN = clamp(eps / EPS_MAX, 0, 1);
+  var glow = clamp((s.T - 110) / 70, 0, 1);
+  var BX = 92, BW = 470, topY = 196, thick0 = 118;
+  var thick = thick0 * (1 - eps * 0.82);
+  var bulge = clamp(cur.vap / Math.max(d.vapPeak, 1), 0, 1) * (d.steamRisk ? 15 : 5) + d.D * 7;
+  lab(cx, 400, 30, 'HOT PRESS \u2014 LAYERED CUTAWAY', '#475569', '700 13px system-ui,sans-serif');
+  /* platen glow + steel */
+  cx.fillStyle = 'rgba(249,115,22,' + (0.20 * glow).toFixed(2) + ')'; cx.fillRect(BX - 26, topY - 66, BW + 52, 40);
+  cx.fillStyle = 'rgba(249,115,22,' + (0.20 * glow).toFixed(2) + ')'; cx.fillRect(BX - 26, topY + thick + 26, BW + 52, 40);
+  function platen(y, flip){
+    var g = cx.createLinearGradient(0, y, 0, y + 34); g.addColorStop(0, '#CBD5E1'); g.addColorStop(0.5, '#94A3B8'); g.addColorStop(1, '#64748B');
+    cx.fillStyle = g; rr(cx, BX - 34, y, BW + 68, 34, 7); cx.fill();
+    cx.fillStyle = '#475569';
+    for (var i = 0; i < 6; i++) cx.fillRect(BX + 16 + i * 76, flip ? y + 34 : y - 12, 18, 12);
+    cx.fillStyle = 'rgba(249,115,22,' + (0.55 * glow).toFixed(2) + ')'; cx.fillRect(BX - 34, flip ? y : y + 30, BW + 68, 4);
+  }
+  platen(topY - 40, false); platen(topY + thick + 6, true);
+  lab(cx, BX + BW/2, topY - 23, 'PLATEN ' + s.T + ' \u00B0C \u00B7 ' + s.P.toFixed(1) + ' MPa', '#FFFFFF', '700 12.5px system-ui,sans-serif');
+  /* board shadow + 2.5D top face */
+  cx.fillStyle = 'rgba(30,41,59,0.16)'; rr(cx, BX + 8, topY + thick + 20, BW, 16, 8); cx.fill();
+  cx.fillStyle = '#C89B58';
+  cx.beginPath(); cx.moveTo(BX, topY); cx.lineTo(BX + 20, topY - 13); cx.lineTo(BX + BW + 20, topY - 13); cx.lineTo(BX + BW, topY); cx.closePath(); cx.fill();
+  cx.fillStyle = '#A97F3F';
+  cx.beginPath(); cx.moveTo(BX + BW, topY); cx.lineTo(BX + BW + 20, topY - 13); cx.lineTo(BX + BW + 20, topY + thick - 13 + 13); cx.lineTo(BX + BW, topY + thick); cx.closePath(); cx.fill();
+  /* front face: surface / core / surface temperature layers, with bulge */
+  function layer(y0, y1, col){
+    cx.fillStyle = col; cx.beginPath();
+    cx.moveTo(BX, y0);
+    cx.quadraticCurveTo(BX + BW/2, y0 + bulge * 0.4, BX + BW, y0);
+    cx.lineTo(BX + BW, y1);
+    cx.quadraticCurveTo(BX + BW/2, y1 + bulge, BX, y1);
+    cx.closePath(); cx.fill();
+  }
+  var surfH = thick * 0.22;
+  layer(topY, topY + surfH, colH(cur.Ts));
+  layer(topY + surfH, topY + thick - surfH, colH(cur.Tc));
+  layer(topY + thick - surfH, topY + thick, colH(cur.Ts));
+  cx.strokeStyle = 'rgba(120,72,20,0.35)'; cx.lineWidth = 1;
+  for (var gl = 1; gl < 7; gl++){ var gy2 = topY + thick * gl / 7; cx.beginPath(); cx.moveTo(BX + 4, gy2); cx.quadraticCurveTo(BX + BW/2, gy2 + bulge * 0.7, BX + BW - 4, gy2); cx.stroke(); }
+  /* cracks from damage */
+  if (d.D > 0.04){
+    var R = seededRand(9), nCr = Math.round(2 + d.D * 9);
+    cx.strokeStyle = 'rgba(40,16,4,' + (0.35 + d.D * 0.6).toFixed(2) + ')'; cx.lineWidth = 1.8;
+    for (var ci = 0; ci < nCr; ci++){
+      var cx0 = BX + 30 + R() * (BW - 60), cy0 = topY + 4; cx.beginPath(); cx.moveTo(cx0, cy0);
+      var segN = 4; for (var q = 0; q < segN; q++){ cx0 += (R() - 0.5) * 22; cy0 += thick / segN; cx.lineTo(cx0, cy0); } cx.stroke();
+    }
+  }
+  /* steam puffs at the edges */
+  var vapN = clamp(cur.vap / Math.max(d.vapPeak, 1), 0, 1);
+  if (vapN > 0.12 && card.playing){
+    for (var sp = 0; sp < 2; sp++){
+      if (Math.random() < vapN) card.puffs.push({ x:BX + (Math.random() < 0.5 ? -6 : BW + 26), y:topY + thick * Math.random(), r:4 + Math.random() * 6, a:0.5, vx:(Math.random() - 0.5) * 12 - 4 });
+    }
+  }
+  card.puffs = card.puffs.filter(function(p){ return p.a > 0.02; });
+  card.puffs.forEach(function(p){
+    p.y -= 0.55; p.x += p.vx * 0.016; p.r += 0.12; p.a *= 0.985;
+    cx.fillStyle = 'rgba(255,255,255,' + (p.a * 0.8).toFixed(2) + ')'; cx.beginPath(); cx.arc(p.x, p.y, p.r, 0, 6.29); cx.fill();
+  });
+  lab(cx, BX + BW/2, topY + thick + 62, 'surface ' + Math.round(cur.Ts) + ' \u00B0C \u00B7 core ' + Math.round(cur.Tc) + ' \u00B0C \u00B7 \u03C1 ' + d.rho.toFixed(3) + ' g/cm^{3}', '#334155', '700 13px system-ui,sans-serif');
+  /* isometric honeycomb inset — cells squash with strain */
+  var hx = 668, hy = 128;
+  lab(cx, hx, hy - 66, 'CELLS SQUASH', '#475569', '700 11.5px system-ui,sans-serif');
+  for (var rI = 0; rI < 3; rI++) for (var cI = 0; cI < 3; cI++){
+    var ccx = hx - 40 + cI * 40 + (rI % 2 ? 20 : 0), ccy = hy - 34 + rI * 36 * (1 - epsN * 0.45);
+    cx.fillStyle = '#F2D492'; hexPath(cx, ccx, ccy, 19, 1 - epsN * 0.52); cx.fill();
+    cx.strokeStyle = '#A97F3F'; cx.lineWidth = 1.6; hexPath(cx, ccx, ccy, 19, 1 - epsN * 0.52); cx.stroke();
+  }
+  lab(cx, hx, hy + 62, 'parenchyma ' + d.paren.toFixed(1) + '%', '#7C5A17', '600 11.5px system-ui,sans-serif');
+  lab(cx, hx, hy + 80, 'vessels ' + d.vessel.toFixed(1) + '%', '#7C5A17', '600 11.5px system-ui,sans-serif');
+  /* vapour gauge */
+  var gx = 668, gy = 316, gr = 52;
+  lab(cx, gx, gy - 70, 'VAPOUR', '#475569', '700 11.5px system-ui,sans-serif');
+  cx.strokeStyle = '#E2E8F0'; cx.lineWidth = 10; cx.beginPath(); cx.arc(gx, gy, gr, Math.PI * 0.85, Math.PI * 2.15); cx.stroke();
+  var va = Math.PI * 0.85 + (Math.PI * 1.3) * clamp(cur.vap / Math.max(d.vapPeak * 1.15, 200), 0, 1);
+  cx.strokeStyle = d.steamRisk ? '#DC2626' : '#7C3AED'; cx.beginPath(); cx.arc(gx, gy, gr, Math.PI * 0.85, va); cx.stroke();
+  cx.strokeStyle = '#111827'; cx.lineWidth = 3; cx.beginPath(); cx.moveTo(gx, gy); cx.lineTo(gx + Math.cos(va) * (gr - 8), gy + Math.sin(va) * (gr - 8)); cx.stroke();
+  cx.fillStyle = '#111827'; cx.beginPath(); cx.arc(gx, gy, 5, 0, 6.29); cx.fill();
+  lab(cx, gx, gy + 34, Math.round(cur.vap) + ' kPa', '#334155', '700 13px system-ui,sans-serif');
+  if (d.steamRisk) pill(cx, 400, 420, 'STEAM BLOW RISK \u2014 MC > 11% & T > 160 \u00B0C', '#DC2626', '#FFFFFF', '700 13.5px system-ui,sans-serif');
+  else if (d.D > 0.2) pill(cx, 400, 420, 'DAMAGE ' + (d.D * 100).toFixed(1) + '% \u2014 OVER THE ' + d.sigmaFrac.toFixed(2) + ' MPa LIMIT', '#B45309', '#FFFFFF', '700 13.5px system-ui,sans-serif');
+  else pill(cx, 400, 420, 'DAMAGE ' + (d.D * 100).toFixed(1) + '% \u00B7 LIMIT ' + d.sigmaFrac.toFixed(2) + ' MPa', '#0F766E', '#FFFFFF', '700 13.5px system-ui,sans-serif');
+}
+
+/* ---------- Sim 3 · 2.5D three-point bending ---------- */
+function drawS3(cx, card, s, d){
+  bgGrad(cx,[[0,'#F8FAFC'],[1,'#E6EDF3']]);
+  var cyc = (card.elapsed % 9) / 9; /* 9 s loading loop */
+  var breakP = 0.68, broken = cyc > breakP, fall = broken ? clamp((cyc - breakP) / 0.16, 0, 1) : 0;
+  var loadF = broken ? 0 : clamp(cyc / breakP, 0, 1);
+  var deflMm = d.dBreak * Math.pow(loadF, 0.92) + fall * 6;
+  var deflPx = deflMm * 5.2;
+  var F = d.Fbreak * Math.pow(loadF, 0.92);
+  var X0 = 120, X1 = 680, beamY = 268, th = 36;
+  lab(cx, 400, 32, 'THREE-POINT BENDING \u2014 ' + s.resin + (d.bundle === 'wide' ? ' WIDE-BUNDLE' : ' NARROW-STRIP') + ' BEAM', '#475569', '700 13px system-ui,sans-serif');
+  /* ground + supports */
+  cx.fillStyle = '#94A3B8'; cx.fillRect(60, 388, 680, 6);
+  [212, 588].forEach(function(sx){
+    cx.fillStyle = '#64748B'; cx.beginPath(); cx.moveTo(sx - 24, 388); cx.lineTo(sx + 24, 388); cx.lineTo(sx, 344); cx.closePath(); cx.fill();
+    cx.fillStyle = '#475569'; cx.beginPath(); cx.arc(sx, 340, 8, 0, 6.29); cx.fill();
+  });
+  /* beam shadow */
+  cx.fillStyle = 'rgba(30,41,59,0.15)'; cx.beginPath(); cx.ellipse(400, 384, 280, 10 + deflPx * 0.12, 0, 0, 6.29); cx.fill();
+  function beamPoint(x){
+    var u = (x - X0) / (X1 - X0);
+    var sag = deflPx * 4 * u * (1 - u);
+    if (broken) sag += fall * 130 * Math.pow(Math.abs(u - 0.5) * 2, 1.4) * (u < 0.5 ? 1 : 1);
+    return sag;
+  }
+  function beamHalf(xFrom, xTo, dropSign){
+    /* front face */
+    cx.beginPath();
+    for (var x = xFrom; x <= xTo; x += 14){ var y = beamY + beamPoint(x) + (broken ? fall * 26 * Math.abs(x - 400) / 280 : 0); if (x === xFrom) cx.moveTo(x, y); else cx.lineTo(x, y); }
+    for (var x2 = xTo; x2 >= xFrom; x2 -= 14){ var y2 = beamY + th + beamPoint(x2) + (broken ? fall * 26 * Math.abs(x2 - 400) / 280 : 0); cx.lineTo(x2, y2); }
+    cx.closePath();
+    var g = cx.createLinearGradient(0, beamY, 0, beamY + th + deflPx);
+    g.addColorStop(0, '#E7BC72'); g.addColorStop(1, '#C08F3E');
+    cx.fillStyle = g; cx.fill(); cx.strokeStyle = '#8A6D1F'; cx.lineWidth = 1.6; cx.stroke();
+  }
+  /* 2.5D top face */
+  cx.beginPath();
+  for (var tx2 = X0; tx2 <= X1; tx2 += 14){ var ty = beamY + beamPoint(tx2) - 12 + (broken ? fall * 26 * Math.abs(tx2 - 400) / 280 : 0); if (tx2 === X0) cx.moveTo(tx2, ty + 12); else cx.lineTo(tx2, ty + 12); }
+  for (var tx3 = X1; tx3 >= X0; tx3 -= 14){ var ty2 = beamY + beamPoint(tx3) - 12 + (broken ? fall * 26 * Math.abs(tx3 - 400) / 280 : 0); cx.lineTo(tx3, ty2); }
+  cx.closePath(); cx.fillStyle = '#F2D492'; cx.fill();
+  if (broken){ beamHalf(X0, 398, -1); beamHalf(402, X1, 1); } else beamHalf(X0, X1, 0);
+  /* fibre lines + tension-face snaps */
+  cx.strokeStyle = 'rgba(122,78,26,0.4)'; cx.lineWidth = 1;
+  for (var f = 0; f < 4; f++){
+    cx.beginPath();
+    for (var fx2 = X0 + 8; fx2 <= X1 - 8; fx2 += 20){ var fy = beamY + 7 + f * 8 + beamPoint(fx2) + (broken ? fall * 26 * Math.abs(fx2 - 400) / 280 : 0); if (fx2 === X0 + 8) cx.moveTo(fx2, fy); else cx.lineTo(fx2, fy); }
+    cx.stroke();
+  }
+  if (loadF > 0.72 && !broken){
+    var R = seededRand(31), nSnap = Math.round((loadF - 0.72) * 30 * (0.5 + d.D));
+    cx.strokeStyle = 'rgba(69,26,3,0.85)'; cx.lineWidth = 1.6;
+    for (var sn = 0; sn < nSnap; sn++){ var sx2 = 400 + (R() - 0.5) * 190, sy2 = beamY + th + beamPoint(sx2); cx.beginPath(); cx.moveTo(sx2, sy2); cx.lineTo(sx2 + (R() - 0.5) * 8, sy2 - 5 - R() * 7); cx.stroke(); }
+  }
+  /* crack at break */
+  if (broken){
+    cx.strokeStyle = '#451A03'; cx.lineWidth = 2.6; cx.beginPath();
+    var ckx = 400; cx.moveTo(ckx, beamY + th + beamPoint(400));
+    for (var q = 1; q <= 4; q++){ ckx += (q % 2 ? 6 : -6); cx.lineTo(ckx, beamY + th + beamPoint(400) - q * (th * (0.4 + fall * 0.6)) / 4); }
+    cx.stroke();
+    if (fall < 0.5) lab(cx, 400, 120, 'CRACK!', '#B91C1C', '800 22px system-ui,sans-serif');
+  }
+  /* ram */
+  var ramY = beamY + beamPoint(400) - 12 - 64 + (broken ? -fall * 30 : 0);
+  cx.fillStyle = '#475569'; cx.fillRect(388, 44, 24, Math.max(10, ramY - 44));
+  var rg = cx.createLinearGradient(0, ramY, 0, ramY + 52); rg.addColorStop(0, '#CBD5E1'); rg.addColorStop(1, '#64748B');
+  cx.fillStyle = rg; rr(cx, 356, ramY, 88, 52, 8); cx.fill();
+  cx.fillStyle = '#334155'; rr(cx, 382, ramY + 52, 36, 14, 4); cx.fill();
+  lab(cx, 400, ramY + 27, F.toFixed(1) + ' kN', '#FFFFFF', '700 13px system-ui,sans-serif');
+  /* readouts on scene */
+  lab(cx, 130, 428, 'deflection ' + deflMm.toFixed(1) + ' mm', '#334155', '700 13px system-ui,sans-serif', 'left');
+  if (broken) pill(cx, 620, 428, 'FAILED AT ' + d.Fbreak.toFixed(1) + ' kN \u00B7 MOR ' + d.MOR.toFixed(1) + ' MPa', '#B91C1C', '#FFFFFF', '700 12.5px system-ui,sans-serif');
+  else if (d.D > 0.2) pill(cx, 620, 428, 'BRITTLE \u2014 DAMAGE ' + (d.D * 100).toFixed(1) + '% \u00B7 SNAPS EARLY', '#B45309', '#FFFFFF', '700 12.5px system-ui,sans-serif');
+  else pill(cx, 620, 428, 'MOR ' + d.MOR.toFixed(1) + ' MPa \u00B7 BENDS DEEP BEFORE FAILURE', '#0F766E', '#FFFFFF', '700 12.5px system-ui,sans-serif');
+}
+
+/* ---------- Sim 4 · twin emission chambers, PF cloud vs LBR clean ---------- */
+var S4_MOL = null;
+function s4Mol(){
+  if (S4_MOL) return S4_MOL;
+  var R = seededRand(4242); S4_MOL = [];
+  for (var i = 0; i < 46; i++) S4_MOL.push({ fx:R(), fy:R(), r:2 + R()*2.6, ph:R()*6.28, sp:0.5 + R() });
+  return S4_MOL;
+}
+function drawS4(cx, card, s, d){
+  bgGrad(cx,[[0,'#F7F5FB'],[1,'#E9E4F2']]);
+  var tH = clamp(card.simTime, 0, 24);
+  var tvPF = d.tvocPFat(tH), tvLBR = d.tvocLBRat(tH);
+  var densPF = clamp(tvPF / Math.max(d.tvocPF24, 1), 0, 1), densLBR = clamp(tvLBR / Math.max(d.tvocPF24, 1), 0, 1);
+  lab(cx, 400, 26, 'SEALED EMISSION CHAMBERS \u2014 24 h', '#4C1D95', '700 13px system-ui,sans-serif');
+  /* clock */
+  var ckx = 400, cky = 58;
+  cx.fillStyle = '#FFFFFF'; cx.beginPath(); cx.arc(ckx, cky, 17, 0, 6.29); cx.fill();
+  cx.strokeStyle = '#6D28D9'; cx.lineWidth = 2; cx.stroke();
+  var ha = -Math.PI/2 + (tH/24) * Math.PI * 2;
+  cx.strokeStyle = '#111827'; cx.lineWidth = 2.4; cx.beginPath(); cx.moveTo(ckx, cky); cx.lineTo(ckx + Math.cos(ha)*11, cky + Math.sin(ha)*11); cx.stroke();
+  lab(cx, 400, 92, 't = ' + tH.toFixed(1) + ' h', '#4C1D95', '700 12px system-ui,sans-serif');
+  var mols = s4Mol();
+  function chamber(x, isPF, tvocNow, dens, selected){
+    var y0 = 108, w = 316, h = 218, boardY = 268;
+    /* glass */
+    cx.fillStyle = 'rgba(255,255,255,0.55)'; rr(cx, x, y0, w, h, 10); cx.fill();
+    /* haze above the board */
+    if (dens > 0.004){
+      var hg = cx.createLinearGradient(0, y0 + 26, 0, boardY);
+      hg.addColorStop(0, 'rgba(124,58,237,' + (0.52*dens).toFixed(2) + ')');
+      hg.addColorStop(1, 'rgba(124,58,237,' + (0.10*dens).toFixed(2) + ')');
+      cx.fillStyle = hg; rr(cx, x + 4, y0 + 4, w - 8, boardY - y0, 8); cx.fill();
+      var n = Math.round(mols.length * dens);
+      for (var i = 0; i < n; i++){
+        var m = mols[i];
+        var mx = x + 16 + m.fx * (w - 32);
+        var my = boardY - 8 - ((m.fy * 130 + card.elapsed * 7 * m.sp) % 132);
+        cx.fillStyle = 'rgba(109,40,217,0.75)'; cx.beginPath(); cx.arc(mx, my, m.r, 0, 6.29); cx.fill();
+        cx.fillStyle = 'rgba(255,255,255,0.65)'; cx.beginPath(); cx.arc(mx - 0.8, my - 0.8, m.r*0.38, 0, 6.29); cx.fill();
+      }
+    }
+    /* board */
+    var bg2 = cx.createLinearGradient(0, boardY, 0, boardY + 46);
+    bg2.addColorStop(0, isPF ? '#D8B06A' : '#E3BC72'); bg2.addColorStop(1, isPF ? '#B8894A' : '#C79A4B');
+    cx.fillStyle = bg2; rr(cx, x + 12, boardY, w - 24, 46, 5); cx.fill();
+    cx.strokeStyle = 'rgba(122,78,26,0.4)'; cx.lineWidth = 1;
+    for (var gl = 1; gl < 4; gl++){ cx.beginPath(); cx.moveTo(x + 16, boardY + gl * 11); cx.lineTo(x + w - 16, boardY + gl * 11); cx.stroke(); }
+    if (!isPF){
+      /* crosslink network locking volatiles inside the LBR board */
+      var R = seededRand(88), nodes = [];
+      for (var ni = 0; ni < 15; ni++) nodes.push([x + 26 + R() * (w - 52), boardY + 7 + R() * 32]);
+      cx.strokeStyle = 'rgba(15,118,110,' + (0.25 + 0.65 * (d.cross/100)).toFixed(2) + ')'; cx.lineWidth = 1.4;
+      for (var a = 0; a < nodes.length; a++) for (var b = a + 1; b < nodes.length; b++){
+        var dx = nodes[a][0] - nodes[b][0], dy = nodes[a][1] - nodes[b][1];
+        if (dx*dx + dy*dy < 2900){ cx.beginPath(); cx.moveTo(nodes[a][0], nodes[a][1]); cx.lineTo(nodes[b][0], nodes[b][1]); cx.stroke(); }
+      }
+      cx.fillStyle = '#0F766E';
+      nodes.forEach(function(nd){ cx.beginPath(); cx.arc(nd[0], nd[1], 2.2, 0, 6.29); cx.fill(); });
+    } else {
+      /* uncrosslinked PF: open chain ends at the board surface */
+      cx.strokeStyle = 'rgba(124,58,237,0.55)'; cx.lineWidth = 1.4;
+      for (var ei = 0; ei < 9; ei++){ var ex = x + 30 + ei * (w - 60)/8; cx.beginPath(); cx.moveTo(ex, boardY + 4); cx.lineTo(ex + 4, boardY - 5); cx.stroke(); }
+    }
+    /* single chamber border — teal + thicker when selected */
+    cx.strokeStyle = selected ? '#0F766E' : '#A78BCA'; cx.lineWidth = selected ? 3.5 : 1.5;
+    rr(cx, x, y0, w, h, 10); cx.stroke();
+    lab(cx, x + w/2, y0 + 20, isPF ? 'PF BOARD \u2014 PHENOL-FORMALDEHYDE' : 'LBR BOARD \u2014 LIGNIN RESIN', isPF ? '#5B21B6' : '#0F766E', '700 12.5px system-ui,sans-serif');
+    if (selected) lab(cx, x + w/2, y0 - 10, 'selected', '#0F766E', '600 11px system-ui,sans-serif');
+    lab(cx, x + w/2, 344, 'TVOC ' + tvocNow.toFixed(1) + ' \u00B5g/m^{3}', isPF ? '#5B21B6' : '#0F766E', '700 14px system-ui,sans-serif');
+    lab(cx, x + w/2, 364, isPF ? 'formaldehyde + benzene / toluene / xylene escaping' : 'crosslink ' + d.cross.toFixed(0) + '% \u00B7 benzene undetected', '#6B7280', '600 11.5px system-ui,sans-serif');
+  }
+  chamber(44, true, tvPF, densPF, s.resin === 'PF');
+  chamber(440, false, tvLBR, densLBR, s.resin === 'LBR');
+  lab(cx, 400, 398, 'FTIR 1596 / 1508 cm^{-1} aromatic \u2193 as lignin crosslinks \u00B7 1735 cm^{-1} C=O \u00B7 XPS O/C 0.45 PF \u2192 0.31 LBR \u00B7 CrI 78.79% LBR vs 88.01% PF', '#4C1D95', '600 11.5px system-ui,sans-serif');
+  if (densPF > 0.55) pill(cx, 400, 426, 'PF CLOUD \u2014 TVOC ' + tvPF.toFixed(0) + ' \u00B5g/m\u00B3 \u00B7 LBR STILL CLEAR AT ' + tvLBR.toFixed(1) + ' \u00B5g/m\u00B3', '#6D28D9', '#FFFFFF', '700 12.5px system-ui,sans-serif');
+  else pill(cx, 400, 426, 'GB/T 44690-2024 CLASS I LINE ON THE GRAPH \u00B7 E1 FORMALDEHYDE LIMIT 1.5 mg/L', '#0F766E', '#FFFFFF', '700 12px system-ui,sans-serif');
+}
+
+/* ---------- Sim 5 · three-liquid race along the vessels, stall across ---------- */
+var LIQ_COL = { oil:'#E9C33B', water:'#2E7FD9', resin:'#D98E1F' };
+function drawS5(cx, card, s, d){
+  bgGrad(cx,[[0,'#FFFBEB'],[1,'#F3E8CF']]);
+  var t = clamp(card.simTime, 0, 900);
+  lab(cx, 330, 28, 'ALONG-GRAIN RACE \u2014 VESSELS RUN THE LENGTH OF THE CULM', '#7C5A17', '700 13px system-ui,sans-serif');
+  /* droplet inset: flattens at low angle, beads at high angle */
+  var th = s.theta, tn = (th - 18) / 72;
+  var dw = 66 - tn * 28, dh = 15 + tn * 33, dx0 = 716, dy0 = 66;
+  cx.strokeStyle = '#A97F3F'; cx.lineWidth = 3; cx.beginPath(); cx.moveTo(dx0 - 52, dy0); cx.lineTo(dx0 + 52, dy0); cx.stroke();
+  cx.fillStyle = LIQ_COL[d.sel];
+  cx.beginPath(); cx.ellipse(dx0, dy0 - dh/2 + 3, dw/2, dh/2, 0, Math.PI, 0); cx.closePath(); cx.fill();
+  cx.fillStyle = 'rgba(255,255,255,0.55)'; cx.beginPath(); cx.ellipse(dx0 - dw*0.18, dy0 - dh*0.62, dw*0.16, dh*0.16, -0.4, 0, 6.29); cx.fill();
+  cx.strokeStyle = '#7C5A17'; cx.lineWidth = 1.6; cx.beginPath(); cx.arc(dx0 - dw/2, dy0, 17, -th * Math.PI/180, 0); cx.stroke();
+  lab(cx, dx0, dy0 + 20, '\u03B8 ' + Math.round(th) + '\u00B0 \u2014 ' + (th < 30 ? 'spreads flat' : th > 65 ? 'beads up \u2014 cos\u03B8 \u2192 0' : 'partial wetting'), '#7C5A17', '700 11.5px system-ui,sans-serif');
+  var X0 = 108, X1 = 692, scale = (X1 - X0) / 6; /* 6 mm track */
+  function X(mm){ return X0 + clamp(mm, 0, 6.2) * scale; }
+  /* finish flag at 5 mm */
+  cx.strokeStyle = '#374151'; cx.lineWidth = 2; cx.beginPath(); cx.moveTo(X(5), 84); cx.lineTo(X(5), 268); cx.stroke();
+  cx.fillStyle = '#111827'; cx.beginPath(); cx.moveTo(X(5), 84); cx.lineTo(X(5) + 15, 90); cx.lineTo(X(5), 96); cx.closePath(); cx.fill();
+  lab(cx, X(5), 76, '5 mm', '#374151', '600 11px system-ui,sans-serif');
+  var lanes = [ ['oil','oil'], ['water','water'], ['resin','resin (LBR)'] ];
+  var fastest = 'oil'; if (d.fronts.water > d.fronts[fastest]) fastest = 'water'; if (d.fronts.resin > d.fronts[fastest]) fastest = 'resin';
+  lanes.forEach(function(L, li){
+    var liq = L[0], y = 108 + li * 62, hh = 34;
+    lab(cx, 58, y + hh/2, L[1], '#5B4A17', '700 12px system-ui,sans-serif');
+    /* vessel tube */
+    cx.fillStyle = '#FDF6DC'; rr(cx, X0, y, X1 - X0, hh, hh/2); cx.fill();
+    var zNow = d.frontAt(d.fronts[liq], t, liq), fx = X(zNow);
+    /* liquid body */
+    if (zNow > 0.01){ cx.fillStyle = LIQ_COL[liq]; cx.globalAlpha = 0.88; rr(cx, X0 + 2, y + 3, Math.max(4, fx - X0 - 2), hh - 6, (hh - 6)/2); cx.fill(); cx.globalAlpha = 1; }
+    /* speed lines behind the leader */
+    if (liq === fastest && zNow > 0.4 && card.playing){
+      cx.strokeStyle = 'rgba(120,90,20,0.5)'; cx.lineWidth = 2;
+      for (var slI = 0; slI < 3; slI++){ var sy = y + 8 + slI * 9, off = (card.elapsed * 130 + slI * 17) % 30; cx.beginPath(); cx.moveTo(Math.max(X0 + 4, fx - 16 - off), sy); cx.lineTo(Math.max(X0 + 4, fx - 4 - off), sy); cx.stroke(); }
+    }
+    /* scar bands */
+    cx.fillStyle = 'rgba(120,72,20,0.55)';
+    for (var sc = 1; sc <= 5; sc++){ var sxb = X0 + sc * (X1 - X0) / 6; cx.fillRect(sxb - 2, y + 2, 4, hh - 4); }
+    if (liq === 'water'){
+      /* trapped bubbles behind the front, stall marks at scars ahead */
+      var R = seededRand(55);
+      cx.fillStyle = 'rgba(255,255,255,0.9)';
+      for (var bi = 0; bi < 8; bi++){ var bx = X0 + 12 + R() * Math.max(10, fx - X0 - 16), by = y + 7 + R() * (hh - 14); cx.beginPath(); cx.arc(bx, by, 2.4 + R() * 1.8, 0, 6.29); cx.fill(); }
+      lab(cx, clamp(fx + 58, 200, 640), y - 9, 'blocked at scars \u2014 apparent \u03B8 \u2248 90\u00B0', '#1D4ED8', '600 11px system-ui,sans-serif');
+    }
+    if (liq === 'oil') lab(cx, clamp(fx + 52, 190, 650), y - 9, 'vessels only \u2014 never in fibres', '#8A6D1F', '600 11px system-ui,sans-serif');
+    /* front edge + distance */
+    cx.strokeStyle = '#5B4A17'; cx.lineWidth = 2.4; cx.beginPath(); cx.moveTo(fx, y + 2); cx.lineTo(fx, y + hh - 2); cx.stroke();
+    lab(cx, clamp(fx, 120, 668), y + hh + 15, zNow.toFixed(2) + ' mm', '#5B4A17', '700 12px system-ui,sans-serif');
+    cx.strokeStyle = liq === d.sel ? '#0F766E' : '#C9B37E'; cx.lineWidth = liq === d.sel ? 3 : 1.4;
+    rr(cx, X0, y, X1 - X0, hh, hh/2); cx.stroke();
+  });
+  /* across-grain inset, magnified */
+  var ay = 316;
+  cx.fillStyle = 'rgba(255,255,255,0.65)'; rr(cx, 60, ay, 680, 84, 8); cx.fill();
+  cx.strokeStyle = '#C9B37E'; cx.lineWidth = 1.4; rr(cx, 60, ay, 680, 84, 8); cx.stroke();
+  lab(cx, 400, ay + 16, 'ACROSS-GRAIN \u2014 MAGNIFIED \u00D7100 \u00B7 PERMEABILITY 10^{4}\u201310^{6}\u00D7 LOWER', '#7C5A17', '700 11.5px system-ui,sans-serif');
+  lanes.forEach(function(L, li){
+    var liq = L[0], y = ay + 30 + li * 17;
+    lab(cx, 104, y + 5, L[1], '#5B4A17', '600 11px system-ui,sans-serif', 'right');
+    cx.fillStyle = '#EFE3BC'; rr(cx, 116, y, 520, 10, 5); cx.fill();
+    var za = liq === d.sel ? d.zAcross : d.fronts[liq] / Math.sqrt(Math.pow(10, s.aniso)) * (liq === 'oil' ? 0.4 : liq === 'water' ? 0.26 : 1);
+    var aw = clamp(za * 100 * (520/40), 1.5, 520);
+    cx.fillStyle = LIQ_COL[liq]; rr(cx, 116, y, aw, 10, 5); cx.fill();
+    lab(cx, 648, y + 5, za.toFixed(3) + ' mm', '#5B4A17', '600 11px system-ui,sans-serif', 'left');
+  });
+  if (s.theta >= 85) pill(cx, 400, 426, 'BEADING \u2014 cos\u03B8 \u2248 0 \u00B7 CAPILLARY PRESSURE COLLAPSES \u00B7 NO FRONT MOVES', '#B45309', '#FFFFFF', '700 12.5px system-ui,sans-serif');
+  else if (s.theta <= 22) pill(cx, 400, 426, 'FLAT WETTING \u2014 \u0394P ' + d.capP.toFixed(2) + ' kPa \u00B7 FRONTS AT FULL WASHBURN SPEED', '#0F766E', '#FFFFFF', '700 12.5px system-ui,sans-serif');
+  else pill(cx, 400, 426, 'CONNECTED VESSELS ' + d.conn.toFixed(1) + '% \u00B7 \u0394P ' + d.capP.toFixed(2) + ' kPa \u00B7 ONE-WAY STREET', '#0F766E', '#FFFFFF', '700 12.5px system-ui,sans-serif');
+}
+</script>
+<script>
+"use strict";
+/* ================================================================
+   Animation loop + eager first-frame painting.
+   All three cards are painted synchronously at load — scene,
+   graphs and readouts — whether or not they are on screen, so no
+   card can ever appear as a blank box. The loop then advances
+   every playing card; sims 1\u20132 run the 15\u201320 min press cycle
+   compressed (900 s of model time per 30 s of wall time).
+   ================================================================ */
+var SPEED = 30; /* model seconds per wall second */
+function cycleLen(idx){
+  if (idx === 0) return 900;
+  if (idx === 1) return Math.max(simStates[1].hold * 60, 300);
+  if (idx === 3) return 24; /* hours */
+  return 900;
+}
+var lastTs = null;
+function frame(ts){
+  if (lastTs === null) lastTs = ts;
+  var dtR = Math.min((ts - lastTs) / 1000, 0.1); lastTs = ts;
+  simCards.forEach(function(card, idx){
+    if (card.playing){
+      card.elapsed += dtR;
+      if (idx === 2) card.simTime = (card.elapsed * SPEED) % 900;
+      else if (idx === 3) card.simTime = (card.elapsed * 1.2) % 24;
+      else card.simTime = (card.elapsed * SPEED) % cycleLen(idx);
+      drawScene(idx);
+      drawGraphs(idx);
+    }
+  });
+  requestAnimationFrame(frame);
+}
+/* Eager paint: start every sim part-way into its cycle so the
+   first frame already shows the physics in motion. */
+simCards.forEach(function(card, idx){
+  card.elapsed = idx === 2 ? 4.2 : 11; /* sim 3: mid-bend; sims 1\u20132: t \u2248 5.5 min */
+  card.simTime = idx === 2 ? 0 : (card.elapsed * SPEED) % cycleLen(idx);
+  refreshCard(idx);
+});
+window.addEventListener('resize', function(){ simCards.forEach(function(c, idx){ drawGraphs(idx); }); });
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>
