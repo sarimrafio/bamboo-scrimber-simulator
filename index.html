@@ -19,11 +19,11 @@
   sub,sup{font-size:.72em;line-height:0;position:relative;vertical-align:baseline}
   sup{top:-.48em}
   sub{bottom:-.22em}
-  .wrap{max-width:1300px;margin:0 auto;padding:0 22px 72px}
+  .wrap{max-width:1560px;margin:0 auto;padding:0 28px 72px}
   header.site{padding:38px 0 20px;border-bottom:1px solid var(--border);margin-bottom:30px}
   header.site h1{font-size:26px;font-weight:600;margin:0;letter-spacing:-0.01em}
   header.site .paper{margin:6px 0 0;font-size:16px;color:var(--muted)}
-  .card{background:var(--panel);border:1px solid var(--border);border-radius:8px;box-shadow:0 1px 2px rgba(17,24,39,.04);padding:26px;margin-bottom:30px}
+  .card{background:var(--panel);border:1px solid var(--border);border-radius:8px;box-shadow:0 1px 2px rgba(17,24,39,.04);padding:28px;margin-bottom:30px}
   .card-head{display:flex;flex-wrap:wrap;align-items:flex-start;justify-content:space-between;gap:14px;margin-bottom:6px}
   .card-head h2{font-size:24px;font-weight:500;margin:0;line-height:1.35;flex:1 1 240px;min-width:0}
   .card-head h2 .num{color:var(--muted);font-weight:400;margin-right:10px;font-size:17px}
@@ -36,7 +36,7 @@
   .sub{margin:0 0 16px;font-size:16.5px;color:var(--muted);max-width:92ch}
   .viewport{position:relative;width:100%;aspect-ratio:4/3;border:1px solid var(--border);border-radius:6px;overflow:hidden;background:#F3F4F6}
   .viewport canvas.sim{position:absolute;inset:0;width:100%;height:100%;display:block}
-  .layout{display:grid;grid-template-columns:minmax(0,7fr) minmax(0,5fr);gap:24px;align-items:start}
+  .layout{display:grid;grid-template-columns:minmax(0,7fr) minmax(0,5fr);gap:28px;align-items:stretch}
   .col-scene,.col-side{min-width:0}
   .col-scene{display:flex;flex-direction:column}
   .col-side{display:flex;flex-direction:column;gap:18px}
@@ -67,6 +67,31 @@
   .col-scene .graphbox{margin-top:18px}
   .graphbox{border:1px solid var(--border);border-radius:6px;padding:12px 14px 10px;background:#fff}
   .graphbox canvas{width:100%;height:118px;display:block}
+  /* Column balancing (desktop) is structural, not measured: the
+     card builder puts a live graph in the LEFT column of every
+     card (under the equations) and a flexing panel in the right
+     column too, so both columns always end at the grid row height
+     and neither can terminate in blank card background. A graph
+     panel grows taller and its canvas is redrawn at the new
+     height, so the fill never looks stretched; text lines are
+     never spaced apart. The canvas is sized purely by its flex
+     container (flex-basis 0, height 0): its bitmap height
+     attribute must never feed back into the layout, or the column
+     inflates frame by frame. Two-graph sims (1, 2, 4) keep their
+     second graph on the right, where it flexes the same way.
+     Single-graph sims (3, 5) carry their one graph on the left
+     and their equations panel on the right, where the bordered
+     equations box is the panel that flexes — its text stays
+     compact at the top with normal line spacing. */
+  @media(min-width:941px){
+    .graphs{flex:1 1 auto;min-height:0}
+    .graphbox{display:flex;flex-direction:column;min-height:0}
+    .graphs .graphbox{flex:1 1 auto}
+    .col-scene .graphbox{flex:1 1 auto}
+    .graphbox canvas{flex:1 1 0px;height:0;min-height:118px}
+    .one-graph .col-side .mid{flex:1 1 auto;display:flex;flex-direction:column}
+    .one-graph .col-side .eqbox{flex:1 1 auto}
+  }
   .controls{display:grid;grid-template-columns:1fr;gap:8px;margin:0}
   .ctl{padding:4px 0}
   .ctl .lab{display:flex;justify-content:space-between;align-items:baseline;gap:10px;font-size:16px;color:var(--muted)}
@@ -467,11 +492,12 @@ SIM_DEFS.forEach(function(def, idx){
   mid.appendChild(eqbox);
   var graphs = document.createElement('div'); graphs.className = 'graphs' + (def.graphs.length > 1 ? '' : '');
   var graphCvs = {};
+  var graphBoxes = [];
   def.graphs.forEach(function(g){
     var gb = document.createElement('div'); gb.className = 'graphbox';
     var gh = document.createElement('h3'); gh.textContent = g.title; gb.appendChild(gh);
     var cv = document.createElement('canvas'); cv.setAttribute('aria-hidden','true'); gb.appendChild(cv);
-    graphs.appendChild(gb); graphCvs[g.id] = cv;
+    graphs.appendChild(gb); graphCvs[g.id] = cv; graphBoxes.push(gb);
   });
   colSide.appendChild(graphs);
   var foot = document.createElement('div'); foot.className = 'foot';
@@ -484,6 +510,22 @@ SIM_DEFS.forEach(function(def, idx){
   colScene.appendChild(foot);
   colScene.appendChild(why);
   colScene.appendChild(mid);
+  /* Column balance is structural (see the CSS note): every card
+     carries a live graph in its left column, under the equations,
+     whose panel flexes to the grid row height — so the left
+     column always ends with that graph, never with bare card
+     background. Two-graph sims keep their second graph on the
+     right, where it flexes the same way. Single-graph sims (3
+     and 5) move their equations panel into the right column
+     instead, where that bordered panel is the one that flexes. */
+  if (graphBoxes.length >= 2){
+    colScene.appendChild(graphBoxes[0]);
+  } else if (graphBoxes.length === 1){
+    colScene.appendChild(graphBoxes[0]);
+    colSide.appendChild(mid);
+    graphs.style.display = 'none';
+    sec.classList.add('one-graph');
+  }
   if (srcbox) sec.appendChild(srcbox);
   cardsEl.appendChild(sec);
   var state = {};
@@ -534,7 +576,7 @@ SIM_DEFS.forEach(function(def, idx){
     playBtn.setAttribute('aria-label', cc.playing ? 'Pause animation' : 'Play animation');
   });
   simStates.push(state);
-  simCards.push({ def:def, el:sec, simCv:simCv, capEl:cap, clockEl:clock, whyEl:why, roEl:roEl, graphCvs:graphCvs, colSceneEl:colScene, colSideEl:colSide, graphsEl:graphs, firstGraphEl:graphs.firstElementChild, playing:true, elapsed:0, simTime:0, derived:null, puffs:[], phase:Math.random()*10 });
+  simCards.push({ def:def, el:sec, simCv:simCv, capEl:cap, clockEl:clock, whyEl:why, roEl:roEl, graphCvs:graphCvs, colSceneEl:colScene, colSideEl:colSide, graphsEl:graphs, graphEls:graphBoxes, layoutEl:layout, firstGraphEl:graphs.firstElementChild, playing:true, elapsed:0, simTime:0, derived:null, puffs:[], phase:Math.random()*10 });
 });
 function rangeFill(inp){
   var min = parseFloat(inp.min), max = parseFloat(inp.max), v = parseFloat(inp.value);
@@ -704,7 +746,7 @@ function refreshCard(idx){
    Live graphs — full solver curves with a moving time cursor
    ================================================================ */
 function setupCanvas(cv, hCss){
-  var W = cv.clientWidth || 600, H = hCss || 118;
+  var W = cv.clientWidth || 600, H = hCss || cv.clientHeight || 118;
   var dpr = Math.min(window.devicePixelRatio || 1, 2);
   if (cv.width !== Math.round(W*dpr) || cv.height !== Math.round(H*dpr)){ cv.width = Math.round(W*dpr); cv.height = Math.round(H*dpr); }
   var cx = cv.getContext('2d'); cx.setTransform(dpr,0,0,dpr,0,0);
@@ -1294,31 +1336,16 @@ simCards.forEach(function(card, idx){
   card.simTime = idx === 2 ? 0 : (card.elapsed * SPEED) % cycleLen(idx);
   refreshCard(idx);
 });
-/* Column balancer: the left column is scene \u2192 Why \u2192 governing
-   equations. If it still ends well above the right column (readouts
-   + sliders + graphs), the first live graph moves into the left
-   column under the equations; if that overshoots, it moves back.
-   On narrow screens the layout stacks, so the graph always returns
-   to the right column to keep the stacked order scene \u2192 Why \u2192
-   equations \u2192 readouts/sliders/graphs \u2192 Zheng strip. */
-function balanceColumns(){
-  simCards.forEach(function(card, idx){
-    var gEl = card.firstGraphEl, graphsEl = card.graphsEl;
-    if (!gEl || !graphsEl || !card.colSceneEl || !card.colSideEl) return;
-    var inLeft = gEl.parentNode === card.colSceneEl;
-    if (window.innerWidth <= 940){
-      if (inLeft){ graphsEl.insertBefore(gEl, graphsEl.firstChild); drawGraphs(idx); }
-      return;
-    }
-    if (!card.def.graphs || card.def.graphs.length < 2) return;
-    var gap = card.colSideEl.offsetHeight - card.colSceneEl.offsetHeight;
-    if (!inLeft && gap > 180){ card.colSceneEl.appendChild(gEl); drawGraphs(idx); }
-    else if (inLeft && gap < -320){ graphsEl.insertBefore(gEl, graphsEl.firstChild); drawGraphs(idx); }
-  });
-}
-balanceColumns();
-window.addEventListener('load', balanceColumns);
-window.addEventListener('resize', function(){ balanceColumns(); simCards.forEach(function(c, idx){ drawGraphs(idx); }); });
+/* Column balance needs no measuring or moving at runtime: the
+   card builder already placed a flexing graph panel in every
+   card's left column and a flexing panel in its right column
+   (see the builder and the CSS note), so both columns always end
+   at the grid row height. All that remains here is to redraw the
+   graph canvases at their final laid-out heights once the page
+   has fully settled, and again whenever the window resizes. */
+function redrawAllGraphs(){ simCards.forEach(function(c, idx){ drawGraphs(idx); }); }
+window.addEventListener('load', redrawAllGraphs);
+window.addEventListener('resize', redrawAllGraphs);
 requestAnimationFrame(frame);
 </script>
 </body>
