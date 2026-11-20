@@ -555,7 +555,12 @@ SIM_DEFS.forEach(function(def, idx){
       var inp = document.createElement('input'); inp.type = 'range';
       inp.min = c.min; inp.max = c.max; inp.step = c.step; inp.value = c.def;
       inp.setAttribute('aria-label', c.label); rangeFill(inp);
-      inp.addEventListener('input', function(){ state[c.k] = parseFloat(inp.value); val.textContent = c.fmt(state[c.k]); rangeFill(inp); onControlChange(idx); });
+      inp.addEventListener('input', function(){ state[c.k] = parseFloat(inp.value); val.textContent = c.fmt(state[c.k]); rangeFill(inp);
+        /* Sim 4's Exposure slider scrubs the chamber scene itself:
+           jump the card clock to the chosen hour so the clouds and
+           the scene clock move with the slider, not just readouts. */
+        if (idx === 3 && c.k === 'expo'){ var cc = simCards[idx]; if (cc){ cc.elapsed = state.expo / 1.2; cc.simTime = state.expo; } }
+        onControlChange(idx); });
       wrap.appendChild(inp); c._valEl = val; c._inputEl = inp;
     }
     ctls.appendChild(wrap);
@@ -1075,10 +1080,17 @@ function drawS2(cx, card, s, d){
 function drawS3(cx, card, s, d){
   bgGrad(cx,[[0,'#F8FAFC'],[1,'#E6EDF3']]);
   var cyc = (card.elapsed % 9) / 9; /* 9 s loading loop */
-  var breakP = 0.68, broken = cyc > breakP, fall = broken ? clamp((cyc - breakP) / 0.16, 0, 1) : 0;
+  /* The ram drives toward 66 kN at a steady rate, so the beam
+     breaks at the moment the ramp reaches ITS break load:
+     a weak beam (low Fbreak — low pressure, low cure, 35% SC)
+     snaps early in the cycle; a strong one bends deep and
+     breaks late. Previously the break was pinned to 68% of
+     the cycle for every slider setting. */
+  var breakP = clamp(d.Fbreak / 66, 0.25, 0.8);
+  var broken = cyc > breakP, fall = broken ? clamp((cyc - breakP) / 0.16, 0, 1) : 0;
   var loadF = broken ? 0 : clamp(cyc / breakP, 0, 1);
   var deflMm = d.dBreak * Math.pow(loadF, 0.92) + fall * 6;
-  var deflPx = deflMm * 5.2;
+  var deflPx = deflMm * 7;
   var F = d.Fbreak * Math.pow(loadF, 0.92);
   var X0 = 120, X1 = 680, beamY = 268, th = 36;
   lab(cx, 400, 32, 'THREE-POINT BENDING \u2014 ' + s.resin + (d.bundle === 'wide' ? ' WIDE-BUNDLE' : ' NARROW-STRIP') + ' BEAM', '#475569', '700 13px system-ui,sans-serif');
@@ -1119,6 +1131,19 @@ function drawS3(cx, card, s, d){
     for (var fx2 = X0 + 8; fx2 <= X1 - 8; fx2 += 20){ var fy = beamY + 7 + f * 8 + beamPoint(fx2) + (broken ? fall * 26 * Math.abs(fx2 - 400) / 280 : 0); if (fx2 === X0 + 8) cx.moveTo(fx2, fy); else cx.lineTo(fx2, fy); }
     cx.stroke();
   }
+  /* press damage, visible on the beam before any load is applied:
+     crack count and darkness follow the solver's damage D, so
+     over-pressing or narrow strips show a pre-cracked beam */
+  if (d.D > 0.03 && !broken){
+    var Rd = seededRand(7), nDmg = Math.round(2 + d.D * 13);
+    cx.strokeStyle = 'rgba(46,20,4,' + (0.30 + 0.60 * d.D).toFixed(2) + ')'; cx.lineWidth = 1.7;
+    for (var di = 0; di < nDmg; di++){
+      var dxp = X0 + 26 + Rd() * (X1 - X0 - 52), dyp = beamY + beamPoint(dxp) + 3, dLen = 9 + Rd() * (th - 14);
+      cx.beginPath(); cx.moveTo(dxp, dyp);
+      var dSeg = 3; for (var dq = 0; dq < dSeg; dq++){ dxp += (Rd() - 0.5) * 9; dyp += dLen / dSeg; cx.lineTo(dxp, dyp); }
+      cx.stroke();
+    }
+  }
   if (loadF > 0.72 && !broken){
     var R = seededRand(31), nSnap = Math.round((loadF - 0.72) * 30 * (0.5 + d.D));
     cx.strokeStyle = 'rgba(69,26,3,0.85)'; cx.lineWidth = 1.6;
@@ -1158,7 +1183,14 @@ function drawS4(cx, card, s, d){
   bgGrad(cx,[[0,'#F7F5FB'],[1,'#E9E4F2']]);
   var tH = clamp(card.simTime, 0, 24);
   var tvPF = d.tvocPFat(tH), tvLBR = d.tvocLBRat(tH);
-  var densPF = clamp(tvPF / Math.max(d.tvocPF24, 1), 0, 1), densLBR = clamp(tvLBR / Math.max(d.tvocPF24, 1), 0, 1);
+  /* Cloud density sits on a FIXED absolute scale (150 µg/m³ = full),
+     never normalised by the PF 24 h value: that endpoint scales with
+     the same cure / temperature / moisture factor as both chambers,
+     so normalising by it cancelled every slider change out of the
+     scene — the clouds only ever moved with the clock. On an absolute
+     scale, dropping the cure degree visibly hazes the LBR chamber
+     (TVOC 2 → 16.6 µg/m³ at α = 0) while the optimum stays clear. */
+  var densPF = Math.pow(clamp(tvPF / 150, 0, 1), 0.55), densLBR = Math.pow(clamp(tvLBR / 150, 0, 1), 0.55);
   lab(cx, 400, 26, 'SEALED EMISSION CHAMBERS \u2014 24 h', '#4C1D95', '700 13px system-ui,sans-serif');
   /* clock */
   var ckx = 400, cky = 58;
@@ -1197,13 +1229,14 @@ function drawS4(cx, card, s, d){
       /* crosslink network locking volatiles inside the LBR board */
       var R = seededRand(88), nodes = [];
       for (var ni = 0; ni < 15; ni++) nodes.push([x + 26 + R() * (w - 52), boardY + 7 + R() * 32]);
-      cx.strokeStyle = 'rgba(15,118,110,' + (0.25 + 0.65 * (d.cross/100)).toFixed(2) + ')'; cx.lineWidth = 1.4;
+      cx.strokeStyle = 'rgba(15,118,110,' + (0.05 + 0.90 * (d.cross/100)).toFixed(2) + ')'; cx.lineWidth = 1.4;
       for (var a = 0; a < nodes.length; a++) for (var b = a + 1; b < nodes.length; b++){
         var dx = nodes[a][0] - nodes[b][0], dy = nodes[a][1] - nodes[b][1];
         if (dx*dx + dy*dy < 2900){ cx.beginPath(); cx.moveTo(nodes[a][0], nodes[a][1]); cx.lineTo(nodes[b][0], nodes[b][1]); cx.stroke(); }
       }
-      cx.fillStyle = '#0F766E';
+      cx.fillStyle = '#0F766E'; cx.globalAlpha = 0.10 + 0.90 * (d.cross/100);
       nodes.forEach(function(nd){ cx.beginPath(); cx.arc(nd[0], nd[1], 2.2, 0, 6.29); cx.fill(); });
+      cx.globalAlpha = 1;
     } else {
       /* uncrosslinked PF: open chain ends at the board surface */
       cx.strokeStyle = 'rgba(124,58,237,0.55)'; cx.lineWidth = 1.4;
@@ -1248,13 +1281,18 @@ function drawS5(cx, card, s, d){
   var lanes = [ ['oil','oil'], ['water','water'], ['resin','resin (LBR)'] ];
   var fastest = 'oil'; if (d.fronts.water > d.fronts[fastest]) fastest = 'water'; if (d.fronts.resin > d.fronts[fastest]) fastest = 'resin';
   lanes.forEach(function(L, li){
-    var liq = L[0], y = 108 + li * 62, hh = 34;
+    var liq = L[0], y = 108 + li * 62, hh = 26 + s.rp * 0.45; /* vessel bore follows the pore-radius slider */
     lab(cx, 58, y + hh/2, L[1], '#5B4A17', '700 12px system-ui,sans-serif');
     /* vessel tube */
     cx.fillStyle = '#FDF6DC'; rr(cx, X0, y, X1 - X0, hh, hh/2); cx.fill();
     var zNow = d.frontAt(d.fronts[liq], t, liq), fx = X(zNow);
-    /* liquid body */
-    if (zNow > 0.01){ cx.fillStyle = LIQ_COL[liq]; cx.globalAlpha = 0.88; rr(cx, X0 + 2, y + 3, Math.max(4, fx - X0 - 2), hh - 6, (hh - 6)/2); cx.fill(); cx.globalAlpha = 1; }
+    /* dashed target: where this front ends at 15 min — moves with
+       the sliders even while the race is still running */
+    cx.strokeStyle = 'rgba(91,74,23,0.5)'; cx.lineWidth = 1.4; cx.setLineDash([3,3]);
+    cx.beginPath(); cx.moveTo(X(d.fronts[liq]), y + 3); cx.lineTo(X(d.fronts[liq]), y + hh - 3); cx.stroke(); cx.setLineDash([]);
+    /* liquid body — the selected liquid runs full-strength, the
+       other two lanes dim so the toggle visibly changes the scene */
+    if (zNow > 0.01){ cx.fillStyle = LIQ_COL[liq]; cx.globalAlpha = liq === d.sel ? 0.92 : 0.42; rr(cx, X0 + 2, y + 3, Math.max(4, fx - X0 - 2), hh - 6, (hh - 6)/2); cx.fill(); cx.globalAlpha = 1; }
     /* speed lines behind the leader */
     if (liq === fastest && zNow > 0.4 && card.playing){
       cx.strokeStyle = 'rgba(120,90,20,0.5)'; cx.lineWidth = 2;
@@ -1281,13 +1319,13 @@ function drawS5(cx, card, s, d){
   var ay = 316;
   cx.fillStyle = 'rgba(255,255,255,0.65)'; rr(cx, 60, ay, 680, 84, 8); cx.fill();
   cx.strokeStyle = '#C9B37E'; cx.lineWidth = 1.4; rr(cx, 60, ay, 680, 84, 8); cx.stroke();
-  lab(cx, 400, ay + 16, 'ACROSS-GRAIN \u2014 MAGNIFIED \u00D7100 \u00B7 PERMEABILITY 10^{4}\u201310^{6}\u00D7 LOWER', '#7C5A17', '700 11.5px system-ui,sans-serif');
+  lab(cx, 400, ay + 16, 'ACROSS-GRAIN \u2014 MAGNIFIED \u00D7400 \u00B7 PERMEABILITY 10^{4}\u201310^{6}\u00D7 LOWER', '#7C5A17', '700 11.5px system-ui,sans-serif');
   lanes.forEach(function(L, li){
     var liq = L[0], y = ay + 30 + li * 17;
     lab(cx, 104, y + 5, L[1], '#5B4A17', '600 11px system-ui,sans-serif', 'right');
     cx.fillStyle = '#EFE3BC'; rr(cx, 116, y, 520, 10, 5); cx.fill();
     var za = liq === d.sel ? d.zAcross : d.fronts[liq] / Math.sqrt(Math.pow(10, s.aniso)) * (liq === 'oil' ? 0.4 : liq === 'water' ? 0.26 : 1);
-    var aw = clamp(za * 100 * (520/40), 1.5, 520);
+    var aw = clamp(za * 5200, 1.5, 520);
     cx.fillStyle = LIQ_COL[liq]; rr(cx, 116, y, aw, 10, 5); cx.fill();
     lab(cx, 648, y + 5, za.toFixed(3) + ' mm', '#5B4A17', '600 11px system-ui,sans-serif', 'left');
   });
