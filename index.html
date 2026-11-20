@@ -14,75 +14,81 @@
   }
   *{box-sizing:border-box}
   html{scroll-behavior:smooth}
-  body{margin:0;background:var(--page);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;line-height:1.55;-webkit-font-smoothing:antialiased;overflow-x:hidden;font-variant-numeric:tabular-nums}
+  body{margin:0;background:var(--page);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;font-size:17px;line-height:1.6;-webkit-font-smoothing:antialiased;overflow-x:hidden;font-variant-numeric:tabular-nums}
   button,input{font:inherit}
   sub,sup{font-size:.72em;line-height:0;position:relative;vertical-align:baseline}
   sup{top:-.48em}
   sub{bottom:-.22em}
-  .wrap{max-width:1060px;margin:0 auto;padding:0 20px 64px}
-  header.site{padding:34px 0 18px;border-bottom:1px solid var(--border);margin-bottom:28px}
-  header.site h1{font-size:20px;font-weight:600;margin:0;letter-spacing:-0.01em}
-  header.site .paper{margin:5px 0 0;font-size:13px;color:var(--muted)}
-  .card{background:var(--panel);border:1px solid var(--border);border-radius:8px;box-shadow:0 1px 2px rgba(17,24,39,.04);padding:22px;margin-bottom:28px}
-  .card-head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin-bottom:6px}
-  .card-head h2{font-size:18px;font-weight:500;margin:0;line-height:1.35}
-  .card-head h2 .num{color:var(--muted);font-weight:400;margin-right:10px;font-size:14px}
-  .badge{flex:none;font-size:11px;font-weight:500;letter-spacing:.04em;padding:3px 8px;border:1px solid var(--border);border-radius:4px;background:#F9FAFB;color:var(--muted);margin-top:3px;text-align:center}
-  .head-actions{display:flex;align-items:flex-start;gap:8px;flex:none}
-  .why-btn{font-size:12.5px;font-weight:500;color:var(--text);background:#fff;border:1px solid var(--border);border-radius:6px;padding:5px 10px;cursor:pointer;min-height:32px;white-space:nowrap}
-  .why-btn:hover{border-color:#D1D5DB;background:#F9FAFB}
-  .why-btn:focus-visible,.reset:focus-visible,.seg button:focus-visible,input[type="range"]:focus-visible,.play-btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-  .why{display:none;border-top:1px solid var(--border);padding:12px 2px 2px;margin-bottom:12px;font-size:14px;color:var(--muted)}
-  .why.open{display:block}
-  .why p{margin:0;max-width:72ch}
-  .sub{margin:0 0 14px;font-size:13.5px;color:var(--muted);max-width:78ch}
-  .viewport{position:relative;width:100%;aspect-ratio:16/9;border:1px solid var(--border);border-radius:6px;overflow:hidden;background:#F3F4F6}
+  .wrap{max-width:1300px;margin:0 auto;padding:0 22px 72px}
+  header.site{padding:38px 0 20px;border-bottom:1px solid var(--border);margin-bottom:30px}
+  header.site h1{font-size:26px;font-weight:600;margin:0;letter-spacing:-0.01em}
+  header.site .paper{margin:6px 0 0;font-size:16px;color:var(--muted)}
+  .card{background:var(--panel);border:1px solid var(--border);border-radius:8px;box-shadow:0 1px 2px rgba(17,24,39,.04);padding:26px;margin-bottom:30px}
+  .card-head{display:flex;flex-wrap:wrap;align-items:flex-start;justify-content:space-between;gap:14px;margin-bottom:6px}
+  .card-head h2{font-size:24px;font-weight:500;margin:0;line-height:1.35;flex:1 1 240px;min-width:0}
+  .card-head h2 .num{color:var(--muted);font-weight:400;margin-right:10px;font-size:17px}
+  .badge{flex:none;max-width:100%;font-size:13px;font-weight:500;letter-spacing:.04em;padding:4px 9px;border:1px solid var(--border);border-radius:4px;background:#F9FAFB;color:var(--muted);margin-top:3px;text-align:center}
+  .head-actions{display:flex;flex-wrap:wrap;align-items:flex-start;gap:8px;flex:0 1 auto;max-width:100%;min-width:0}
+  .reset:focus-visible,.seg button:focus-visible,input[type="range"]:focus-visible,.play-btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+  .why{border:1px solid var(--border);border-radius:6px;padding:16px 18px;background:#FDFDFC;margin-top:16px}
+  .why h3{font-size:14px;font-weight:600;color:var(--muted);margin:0 0 8px;letter-spacing:.02em}
+  .why p{margin:0;font-size:16px;line-height:1.65;color:#4B5563}
+  .sub{margin:0 0 16px;font-size:16.5px;color:var(--muted);max-width:92ch}
+  .viewport{position:relative;width:100%;aspect-ratio:4/3;border:1px solid var(--border);border-radius:6px;overflow:hidden;background:#F3F4F6}
   .viewport canvas.sim{position:absolute;inset:0;width:100%;height:100%;display:block}
-  .readouts{display:flex;flex-wrap:wrap;gap:8px 22px;margin-top:14px;padding:12px 2px 2px;border-top:1px solid var(--border)}
-  .ro{font-size:13px;color:var(--muted)}
-  .ro b{color:var(--text);font-weight:600}
+  .layout{display:grid;grid-template-columns:minmax(0,7fr) minmax(0,5fr);gap:24px;align-items:start}
+  .col-scene,.col-side{min-width:0}
+  .col-scene{display:flex;flex-direction:column}
+  .col-side{display:flex;flex-direction:column;gap:18px}
+  @media(max-width:940px){
+    .layout{display:flex;flex-direction:column;gap:18px}
+    .col-scene,.col-side{width:100%}
+  }
+  .readouts{display:grid;grid-template-columns:1fr 1fr;gap:10px 20px;margin:0;padding:2px 2px 14px;border-bottom:1px solid var(--border)}
+  .ro{font-size:15.5px;line-height:1.45;color:var(--muted)}
+  .ro b{color:var(--text);font-weight:700}
   .ro.coupled b{color:var(--accent)}
+  .ro.coupled{grid-column:1/-1}
   .srcbox{display:grid;grid-template-columns:1fr;gap:10px;margin-top:12px}
   @media(min-width:820px){.srcbox{grid-template-columns:1fr 1fr}}
-  .src{border:1px solid var(--border);border-radius:6px;padding:10px 12px;background:#FDFDFC}
-  .src p{margin:4px 0 0;font-size:12.5px;line-height:1.55;color:var(--muted)}
-  .src-lab{font-size:11.5px;font-weight:600}
+  .src{border:1px solid var(--border);border-radius:6px;padding:14px 16px;background:#FDFDFC}
+  .src p{margin:5px 0 0;font-size:15px;line-height:1.6;color:var(--muted)}
+  .src-lab{font-size:14px;font-weight:600}
   .src-lab.exp{color:#92400E}
   .src-lab.mod{color:var(--accent)}
-  .mid{display:grid;grid-template-columns:1fr;gap:14px;margin-top:14px}
-  @media(min-width:820px){.mid{grid-template-columns:1fr 1fr}}
-  .eqbox{border:1px solid var(--border);border-radius:6px;padding:12px 14px;background:#FDFDFC}
-  .eqbox h3,.graphbox h3{font-size:12px;font-weight:600;color:var(--muted);margin:0 0 8px;letter-spacing:.02em}
-  .eqbox p{margin:0 0 7px;font-size:13px;line-height:1.5}
+  .mid{margin-top:18px}
+  .eqbox{border:1px solid var(--border);border-radius:6px;padding:16px 18px;background:#FDFDFC;width:100%}
+  .eqbox h3,.graphbox h3{font-size:14px;font-weight:600;color:var(--muted);margin:0 0 10px;letter-spacing:.02em}
+  .eqbox p{margin:0 0 8px;font-size:16px;line-height:1.55}
   .eqbox p:last-child{margin-bottom:0}
-  .eqbox .eq{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12.5px;color:var(--text)}
-  .eqbox .note{color:var(--muted);font-size:12.5px}
-  .graphs{display:grid;grid-template-columns:1fr;gap:14px}
-  @media(min-width:820px){.graphs.two{grid-template-columns:1fr 1fr}}
-  .graphbox{border:1px solid var(--border);border-radius:6px;padding:10px 12px 8px;background:#fff}
+  .eqbox .eq{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:15px;color:var(--text)}
+  .eqbox .note{color:var(--muted);font-size:15.5px}
+  .graphs{display:flex;flex-direction:column;gap:14px}
+  .col-scene .graphbox{margin-top:18px}
+  .graphbox{border:1px solid var(--border);border-radius:6px;padding:12px 14px 10px;background:#fff}
   .graphbox canvas{width:100%;height:118px;display:block}
-  .controls{display:grid;grid-template-columns:1fr;gap:6px;margin-top:16px}
-  @media(min-width:760px){.controls{grid-template-columns:1fr 1fr;gap:6px 32px}}
+  .controls{display:grid;grid-template-columns:1fr;gap:8px;margin:0}
   .ctl{padding:4px 0}
-  .ctl .lab{display:flex;justify-content:space-between;align-items:baseline;gap:10px;font-size:13.5px;color:var(--muted)}
+  .ctl .lab{display:flex;justify-content:space-between;align-items:baseline;gap:10px;font-size:16px;color:var(--muted)}
   .ctl .lab label{font-weight:400;color:var(--text)}
-  .ctl .val{font-weight:500;color:var(--text);font-size:13.5px;white-space:nowrap}
-  input[type="range"]{width:100%;height:32px;margin:2px 0 0;cursor:pointer;background:transparent;-webkit-appearance:none;appearance:none;background-repeat:no-repeat;background-size:100% 3px;background-position:center}
+  .ctl .val{font-weight:600;color:var(--text);font-size:16px;white-space:nowrap}
+  input[type="range"]{width:100%;height:36px;margin:2px 0 0;cursor:pointer;background:transparent;-webkit-appearance:none;appearance:none;background-repeat:no-repeat;background-size:100% 3px;background-position:center}
   input[type="range"]::-webkit-slider-runnable-track{height:3px;border-radius:99px;background:transparent}
   input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:15px;height:15px;border-radius:50%;background:#fff;border:2px solid var(--accent);margin-top:-6px}
   input[type="range"]::-moz-range-track{height:3px;border-radius:99px;background:var(--track)}
   input[type="range"]::-moz-range-progress{height:3px;border-radius:99px;background:var(--accent)}
   input[type="range"]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;background:#fff;border:2px solid var(--accent)}
   .seg{display:flex;gap:8px;padding:6px 0 8px}
-  .seg button{flex:1;min-height:38px;border-radius:6px;border:1px solid var(--border);background:#fff;color:var(--muted);font-weight:500;cursor:pointer}
+  .seg button{flex:1;min-height:44px;font-size:16px;border-radius:6px;border:1px solid var(--border);background:#fff;color:var(--muted);font-weight:500;cursor:pointer}
   .seg button.on{border-color:var(--accent);color:var(--accent);background:#F0FDF9}
   .foot{display:flex;align-items:center;justify-content:space-between;gap:14px;border-top:1px solid var(--border);margin-top:14px;padding-top:12px}
-  .caption{font-size:13.5px;font-weight:500;margin:0;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .caption{font-size:15.5px;font-weight:500;margin:0;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .foot-actions{display:flex;gap:8px;flex:none}
-  .play-btn,.reset{background:#fff;border:1px solid var(--border);border-radius:6px;color:var(--text);font-weight:500;font-size:12.5px;cursor:pointer;min-height:32px;padding:5px 12px}
+  .play-btn,.reset{background:#fff;border:1px solid var(--border);border-radius:6px;color:var(--text);font-weight:500;font-size:14.5px;cursor:pointer;min-height:38px;padding:6px 14px}
   .play-btn{min-width:76px}
   .play-btn:hover,.reset:hover{border-color:#D1D5DB;background:#F9FAFB}
-  .clock{font-size:12.5px;color:var(--muted);white-space:nowrap}
+  .clock{font-size:14.5px;color:var(--muted);white-space:nowrap}
+  @media(max-width:560px){.card{padding:18px}.card-head{flex-direction:column;gap:10px}.card-head h2{font-size:21px;flex:none;width:100%}.head-actions{width:100%}.readouts{grid-template-columns:1fr}.wrap{padding:0 14px 56px}}
 </style>
 </head>
 <body>
@@ -422,24 +428,25 @@ SIM_DEFS.forEach(function(def, idx){
   var ns = document.createElement('span'); ns.className = 'num'; ns.textContent = '0' + (idx + 1);
   h.appendChild(ns); h.appendChild(document.createTextNode(def.title)); head.appendChild(h);
   var actions = document.createElement('div'); actions.className = 'head-actions';
-  var wb = document.createElement('button'); wb.type = 'button'; wb.className = 'why-btn'; wb.textContent = 'Why this matters'; wb.setAttribute('aria-expanded','false');
   var b = document.createElement('span'); b.className = 'badge'; b.textContent = def.badge;
-  actions.appendChild(wb); actions.appendChild(b); head.appendChild(actions);
+  actions.appendChild(b); head.appendChild(actions);
   sec.appendChild(head);
   var sub = document.createElement('p'); sub.className = 'sub'; sub.innerHTML = def.sub; sec.appendChild(sub);
   var why = document.createElement('div'); why.className = 'why'; why.id = 'why-panel-' + idx;
-  var wp = document.createElement('p'); wp.innerHTML = def.why; why.appendChild(wp); sec.appendChild(why);
-  wb.setAttribute('aria-controls', why.id);
-  wb.addEventListener('click', function(){
-    var open = why.classList.toggle('open'); wb.setAttribute('aria-expanded', open ? 'true' : 'false');
-    if (open) simCards.forEach(function(c, i){ if (i !== idx && c.whyEl){ c.whyEl.classList.remove('open'); c.whyBtn.setAttribute('aria-expanded','false'); } });
-  });
+  var wh = document.createElement('h3'); wh.textContent = 'Why this matters'; why.appendChild(wh);
+  var wp = document.createElement('p'); wp.innerHTML = def.why; why.appendChild(wp);
+  var layout = document.createElement('div'); layout.className = 'layout';
+  var colScene = document.createElement('div'); colScene.className = 'col-scene';
+  var colSide = document.createElement('div'); colSide.className = 'col-side';
+  layout.appendChild(colScene); layout.appendChild(colSide); sec.appendChild(layout);
   var vp = document.createElement('div'); vp.className = 'viewport';
-  var simCv = document.createElement('canvas'); simCv.className = 'sim'; simCv.width = 800; simCv.height = 450; simCv.setAttribute('aria-hidden','true');
-  vp.appendChild(simCv); sec.appendChild(vp);
-  var roEl = document.createElement('div'); roEl.className = 'readouts'; sec.appendChild(roEl);
+  var simCv = document.createElement('canvas'); simCv.className = 'sim'; simCv.width = 800; simCv.height = 600; simCv.setAttribute('aria-hidden','true');
+  vp.appendChild(simCv); colScene.appendChild(vp);
+  var roEl = document.createElement('div'); roEl.className = 'readouts'; colSide.appendChild(roEl);
+  var ctls = document.createElement('div'); ctls.className = 'controls'; colSide.appendChild(ctls);
+  var srcbox = null;
   if (def.srcExp){
-    var srcbox = document.createElement('div'); srcbox.className = 'srcbox';
+    srcbox = document.createElement('div'); srcbox.className = 'srcbox';
     [['exp', 'Zheng et al. 2025 · Ind. Crops Prod. 233, 121450 — experimental (measured)', def.srcExp],
      ['mod', 'Dhaka coupled model — predicted (this simulator)', def.srcModel]].forEach(function(pair){
       var cell = document.createElement('div'); cell.className = 'src';
@@ -447,7 +454,6 @@ SIM_DEFS.forEach(function(def, idx){
       var sp = document.createElement('p'); sp.innerHTML = pair[2]; cell.appendChild(sp);
       srcbox.appendChild(cell);
     });
-    sec.appendChild(srcbox);
   }
   var mid = document.createElement('div'); mid.className = 'mid';
   var eqbox = document.createElement('div'); eqbox.className = 'eqbox';
@@ -467,8 +473,7 @@ SIM_DEFS.forEach(function(def, idx){
     var cv = document.createElement('canvas'); cv.setAttribute('aria-hidden','true'); gb.appendChild(cv);
     graphs.appendChild(gb); graphCvs[g.id] = cv;
   });
-  mid.appendChild(graphs); sec.appendChild(mid);
-  var ctls = document.createElement('div'); ctls.className = 'controls'; sec.appendChild(ctls);
+  colSide.appendChild(graphs);
   var foot = document.createElement('div'); foot.className = 'foot';
   var cap = document.createElement('p'); cap.className = 'caption'; cap.textContent = '\u2014'; foot.appendChild(cap);
   var clock = document.createElement('span'); clock.className = 'clock'; foot.appendChild(clock);
@@ -476,7 +481,10 @@ SIM_DEFS.forEach(function(def, idx){
   var playBtn = document.createElement('button'); playBtn.className = 'play-btn'; playBtn.type = 'button'; playBtn.textContent = 'Pause'; playBtn.setAttribute('aria-label','Pause animation');
   var rst = document.createElement('button'); rst.className = 'reset'; rst.type = 'button'; rst.textContent = 'Reset';
   footActs.appendChild(playBtn); footActs.appendChild(rst); foot.appendChild(footActs);
-  sec.appendChild(foot);
+  colScene.appendChild(foot);
+  colScene.appendChild(why);
+  colScene.appendChild(mid);
+  if (srcbox) sec.appendChild(srcbox);
   cardsEl.appendChild(sec);
   var state = {};
   def.controls.forEach(function(c){
@@ -526,7 +534,7 @@ SIM_DEFS.forEach(function(def, idx){
     playBtn.setAttribute('aria-label', cc.playing ? 'Pause animation' : 'Play animation');
   });
   simStates.push(state);
-  simCards.push({ def:def, el:sec, simCv:simCv, capEl:cap, clockEl:clock, whyEl:why, whyBtn:wb, roEl:roEl, graphCvs:graphCvs, playing:true, elapsed:0, simTime:0, derived:null, puffs:[], phase:Math.random()*10 });
+  simCards.push({ def:def, el:sec, simCv:simCv, capEl:cap, clockEl:clock, whyEl:why, roEl:roEl, graphCvs:graphCvs, colSceneEl:colScene, colSideEl:colSide, graphsEl:graphs, firstGraphEl:graphs.firstElementChild, playing:true, elapsed:0, simTime:0, derived:null, puffs:[], phase:Math.random()*10 });
 });
 function rangeFill(inp){
   var min = parseFloat(inp.min), max = parseFloat(inp.max), v = parseFloat(inp.value);
@@ -706,7 +714,7 @@ function graphFrame(cv, o){
   var g = setupCanvas(cv), cx = g.cx, W = g.W, H = g.H;
   var padL = 40, padR = 10, padT = 8, padB = 18, iw = W - padL - padR, ih = H - padT - padB;
   cx.clearRect(0,0,W,H);
-  cx.font = '10px system-ui,sans-serif'; cx.fillStyle = '#9CA3AF'; cx.strokeStyle = '#EEF0F2'; cx.lineWidth = 1;
+  cx.font = '11.5px system-ui,sans-serif'; cx.fillStyle = '#9CA3AF'; cx.strokeStyle = '#EEF0F2'; cx.lineWidth = 1;
   for (var i = 0; i <= 2; i++){
     var gy = padT + ih * i/2, val = o.ymax * (1 - i/2);
     cx.beginPath(); cx.moveTo(padL, gy); cx.lineTo(padL + iw, gy); cx.stroke();
@@ -787,7 +795,7 @@ function drawGraphs(idx){
    Every scene is drawn from the live solver state at the card's
    current sim time, so sliders change motion and colour at once.
    ================================================================ */
-var LW = 800, LH = 450;
+var LW = 800, LH = 600, LH_CONTENT = 450, LY_OFF = (LH - LH_CONTENT) / 2;
 function rr(cx,x,y,w,h,r){ cx.beginPath(); cx.moveTo(x+r,y); cx.arcTo(x+w,y,x+w,y+h,r); cx.arcTo(x+w,y+h,x,y+h,r); cx.arcTo(x,y+h,x,y,r); cx.arcTo(x,y,x+w,y,r); cx.closePath(); }
 function pill(cx,x,y,text,bg,fg,font){ cx.font = font || '700 15px system-ui,sans-serif'; var w = cx.measureText(text).width + 26; cx.fillStyle = bg; rr(cx,x-w/2,y-16,w,32,16); cx.fill(); cx.fillStyle = fg; cx.textAlign='center'; cx.textBaseline='middle'; cx.fillText(text,x,y+1); return w; }
 function lab(cx,x,y,text,fg,font,align){
@@ -817,11 +825,12 @@ function lab(cx,x,y,text,fg,font,align){
     sx += sg.w;
   });
 }
-function bgGrad(cx,stops){ var g = cx.createLinearGradient(0,0,0,LH); stops.forEach(function(s){ g.addColorStop(s[0],s[1]); }); cx.fillStyle=g; cx.fillRect(0,0,LW,LH); }
+function bgGrad(cx,stops){ cx.save(); cx.setTransform(1,0,0,1,0,0); var g = cx.createLinearGradient(0,0,0,LH); stops.forEach(function(s){ g.addColorStop(s[0],s[1]); }); cx.fillStyle=g; cx.fillRect(0,0,LW,LH); cx.restore(); }
 function hexPath(cx,x,y,r,sy){ cx.beginPath(); for (var i=0;i<6;i++){ var a = Math.PI/3*i + Math.PI/6, px = x + r*Math.cos(a), py = y + r*Math.sin(a)*(sy||1); if (i===0) cx.moveTo(px,py); else cx.lineTo(px,py); } cx.closePath(); }
 function drawScene(idx){
   var card = simCards[idx], cv = card.simCv, cx = cv.getContext('2d');
   cx.setTransform(1,0,0,1,0,0); cx.clearRect(0,0,LW,LH);
+  cx.setTransform(1,0,0,1,0,LY_OFF);
   var s = simStates[idx], d = derive(idx);
   try {
     if (idx === 0) drawS1(cx, card, s, d);
@@ -1285,7 +1294,31 @@ simCards.forEach(function(card, idx){
   card.simTime = idx === 2 ? 0 : (card.elapsed * SPEED) % cycleLen(idx);
   refreshCard(idx);
 });
-window.addEventListener('resize', function(){ simCards.forEach(function(c, idx){ drawGraphs(idx); }); });
+/* Column balancer: the left column is scene \u2192 Why \u2192 governing
+   equations. If it still ends well above the right column (readouts
+   + sliders + graphs), the first live graph moves into the left
+   column under the equations; if that overshoots, it moves back.
+   On narrow screens the layout stacks, so the graph always returns
+   to the right column to keep the stacked order scene \u2192 Why \u2192
+   equations \u2192 readouts/sliders/graphs \u2192 Zheng strip. */
+function balanceColumns(){
+  simCards.forEach(function(card, idx){
+    var gEl = card.firstGraphEl, graphsEl = card.graphsEl;
+    if (!gEl || !graphsEl || !card.colSceneEl || !card.colSideEl) return;
+    var inLeft = gEl.parentNode === card.colSceneEl;
+    if (window.innerWidth <= 940){
+      if (inLeft){ graphsEl.insertBefore(gEl, graphsEl.firstChild); drawGraphs(idx); }
+      return;
+    }
+    if (!card.def.graphs || card.def.graphs.length < 2) return;
+    var gap = card.colSideEl.offsetHeight - card.colSceneEl.offsetHeight;
+    if (!inLeft && gap > 180){ card.colSceneEl.appendChild(gEl); drawGraphs(idx); }
+    else if (inLeft && gap < -320){ graphsEl.insertBefore(gEl, graphsEl.firstChild); drawGraphs(idx); }
+  });
+}
+balanceColumns();
+window.addEventListener('load', balanceColumns);
+window.addEventListener('resize', function(){ balanceColumns(); simCards.forEach(function(c, idx){ drawGraphs(idx); }); });
 requestAnimationFrame(frame);
 </script>
 </body>
