@@ -1155,7 +1155,7 @@ function drawS3(cx, card, s, d){
     var ckx = 400; cx.moveTo(ckx, beamY + th + beamPoint(400));
     for (var q = 1; q <= 4; q++){ ckx += (q % 2 ? 6 : -6); cx.lineTo(ckx, beamY + th + beamPoint(400) - q * (th * (0.4 + fall * 0.6)) / 4); }
     cx.stroke();
-    if (fall < 0.5) lab(cx, 400, 120, 'CRACK!', '#B91C1C', '800 22px system-ui,sans-serif');
+    if (fall < 0.5) lab(cx, 565, 120, 'CRACK!', '#B91C1C', '800 22px system-ui,sans-serif');
   }
   /* ram */
   var ramY = beamY + beamPoint(400) - 12 - 64 + (broken ? -fall * 30 : 0);
@@ -1306,7 +1306,7 @@ function drawS5(cx, card, s, d){
       var R = seededRand(55);
       cx.fillStyle = 'rgba(255,255,255,0.9)';
       for (var bi = 0; bi < 8; bi++){ var bx = X0 + 12 + R() * Math.max(10, fx - X0 - 16), by = y + 7 + R() * (hh - 14); cx.beginPath(); cx.arc(bx, by, 2.4 + R() * 1.8, 0, 6.29); cx.fill(); }
-      lab(cx, clamp(fx + 58, 200, 640), y - 9, 'blocked at scars \u2014 apparent \u03B8 \u2248 90\u00B0', '#1D4ED8', '600 11px system-ui,sans-serif');
+      lab(cx, fx + 14, y + hh/2, 'blocked at scars \u2014 apparent \u03B8 \u2248 90\u00B0', '#1D4ED8', '600 11px system-ui,sans-serif', 'left');
     }
     if (liq === 'oil') lab(cx, clamp(fx + 52, 190, 650), y - 9, 'vessels only \u2014 never in fibres', '#8A6D1F', '600 11px system-ui,sans-serif');
     /* front edge + distance */
